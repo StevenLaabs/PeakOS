@@ -6,15 +6,14 @@ FLAGS equ PAGEALIGN | MEMINFO					; Multiboot header flags
 
 CHECKSUM equ -(MAGIC + FLAGS)
 
-section .multiboot
+section .__mbHeader
+align 4
 
 dd MAGIC
 dd FLAGS
 dd CHECKSUM
 
-
 BITS 32
-ALIGN 4
 GLOBAL _boot_start
 section .text
 

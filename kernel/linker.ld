@@ -1,13 +1,14 @@
 ENTRY(_boot_start)
 
 SECTIONS {
-	. = 1M;
+	. = 0x100000;
 
-	.boot : {
-		*(.multiboot);
+	.__mbHeader : {
+		*(.__mbHeader)
 	}
 
 	.text : {
-		*(.text);
+		*(multiboot)
+		*(.text)
 	}
 }
