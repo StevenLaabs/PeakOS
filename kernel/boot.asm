@@ -1,14 +1,24 @@
-bits 32
-align 4
+MAGIC equ 0x1BADB002							; Magic number provided in the multiboot specification
 
-global _boot_start
+PAGEALIGN equ (1 << 0)							; Align memory to 4KB boundaries
+MEMINFO equ (1 << 1)							; Provide multiboot info structure
+FLAGS equ PAGEALIGN | MEMINFO					; Multiboot header flags
 
+CHECKSUM equ -(MAGIC + FLAGS)
+
+section .multiboot
+
+dd MAGIC
+dd FLAGS
+dd CHECKSUM
+
+
+BITS 32
+ALIGN 4
+GLOBAL _boot_start
 section .text
 
 ; BEGIN - configure multiboot 
-MAGIC dd 0x1BADB002 							; Magic number provided in the multiboot specification
-FLAGS dd (1 << 0) | (1 << 1) 					; Align memory to 4KB boundaries and provide multiboot info structure
-CHECKSUM dd -(MAGIC + FLAGS)
 
 multiboot_mem_high dd 0
 multiboot_mem_low dd 0
