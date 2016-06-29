@@ -1,0 +1,4 @@
+begin code
+<i=fixed> ; {code.broken}
+print [HELLO WORLD]
+/end 
