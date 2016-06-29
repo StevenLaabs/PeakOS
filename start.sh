@@ -1,1 +1,1 @@
-qemu-system-x86_64 -cdrom build/hobby-os.iso
+qemu-system-i386 -cdrom build/hobby-os.iso

@@ -6,10 +6,10 @@ grub_cfg := kernel/grub.cfg
 all: kernel.bin
 
 boot.o: kernel/boot.asm
-	nasm -g -f elf64 -o boot.o kernel/boot.asm
+	nasm -felf32 kernel/boot.asm -o boot.o
 
 kernel.bin: boot.o kernel/linker.ld
-	ld -n -o $(kernel) -T kernel/linker.ld boot.o
+	i686-elf-gcc -T kernel/linker.ld -o $(kernel) -ffreestanding -O2 -nostdlib boot.o -lgcc
 
 iso: $(iso)
 
