@@ -8,7 +8,6 @@ SECTIONS {
 	}
 
 	.text : {
-		*(multiboot)
 		*(.text)
 	}
 }

@@ -7,6 +7,7 @@ MEMINFO equ (1 << 1)                            ; Provide multiboot info structu
 FLAGS equ PAGEALIGN | MEMINFO                   ; Multiboot header flags
 
 CHECKSUM equ -(MAGIC + FLAGS)
+
 section .__mbHeader
 align 4
 
@@ -18,7 +19,6 @@ section .text
 GLOBAL _boot_start
 
 ; BEGIN - configure multiboot 
-
 multiboot_mem_high dd 0
 multiboot_mem_low dd 0
 multiboot_info_structure dd 0
