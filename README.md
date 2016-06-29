@@ -12,8 +12,8 @@ Hobby OS
 * gcc
 * qemu
 
-```$ git clone https://github.com/StevenLaabs/hobby-os.git
-
+```bash
+$ git clone https://github.com/StevenLaabs/hobby-os.git
 $ ./build.sh
-
-$ ./start.sh```
+$ ./start.sh
+```
