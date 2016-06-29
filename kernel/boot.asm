@@ -33,8 +33,8 @@ gdt_start:
 	db 0, 0, 0, 0, 0, 0, 0, 0
 	db 255, 255, 0, 0, 0, 0x92, 0xCF, 0	        ; data segment, kernel access
 	db 255, 255, 0, 0, 0, 0x9A, 0xCF, 0	        ; code segment, kernel access
-	db 255, 255, 0, 0, 0, 0xF2, 0xCF, 0			; data segment, user access
-	db 255, 255, 0, 0, 0, 0xFA, 0xCF, 0			; code segment, user access
+	db 255, 255, 0, 0, 0, 0xF2, 0xCF, 0         ; data segment, user access
+	db 255, 255, 0, 0, 0, 0xFA, 0xCF, 0         ; code segment, user access
 	; 40 bytes offset	
 
 gdt_ptr db 39, 0, 0, 0, 0, 0                    ; first 2 bytes - size of table, last 4 bytes - location in memory
@@ -75,17 +75,17 @@ _boot_start:
 	; END - gdt set up
 
 	; BEGIN - flush registers and load into the new segment registers
-	jmp 0x08:.flush_cs                          ; 0x08 points to new code selector
+	;jmp 0x08:.flush_cs                          ; 0x08 points to new code selector
 
-.flush_cs:
+;.flush_cs:
 	
 	; Reload data segments to point at new data selector
-	mov ax, 0x10                                ; 0x10 points to new data selector
-	mov ds, ax
-	mov es, ax
-	mov fs, ax
-	mov gs, ax
-	mov ss, ax
+	;mov ax, 0x10                                ; 0x10 points to new data selector
+	;mov ds, ax
+	;mov es, ax
+	;mov fs, ax
+	;mov gs, ax
+	;mov ss, ax
 	; END - registers reloaded
 
 	extern kinit
@@ -109,9 +109,6 @@ error_msg:
 ; Hang kernel in loop
 hang:
 	cli
-
-	mov dword [0xB8000], 0x4f524f45
-
 	hlt
 	jmp hang
 

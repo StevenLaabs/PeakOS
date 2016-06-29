@@ -4,7 +4,7 @@
 #if defined(__cplusplus)
 extern "C"
 #endif
-void kmain() 
+void kinit() 
 {
 	uint16_t* vga = (uint16_t*) 0xB8000;
 	
