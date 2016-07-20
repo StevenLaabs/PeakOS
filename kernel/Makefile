@@ -1,15 +1,50 @@
-iso := build/hobby-os.iso
-kernel := kernel.bin
+# Reference for this makefile comes from: http://wiki.osdev.org/Meaty_Skeleton#Makefile_Design
 
-grub_cfg := kernel/grub.cfg
+HOST ?= i686-elf
+HOSTARCH := $(shell ../target-triplet-to-arch.sh $(HOST))
 
-all: kernel.bin
+CFLAGS?=-O2 -g
+LDFLAGS?=
+LIBS?=
 
+DESTDIR?=
+PREFIX?=/usr/local
+EXEC_PREFIX?=$(PREFIX)
+BOOTDIR?=$(EXEC_PREFIX)/boot
+INCLUDEDIR?=$(PREFIX)/include
+
+CFLAGS:=$(CFLAGS) -ffreestanding -fbuiltin -Wall -Wextra
+LDFLAGS:=$(LDFLAGS)
+LIBS:=$(LIBS) -nostdlib -lgcc
+
+ARCHDIR:=arch/$(HOSTARCH)
+
+include $(ARCHDIR)/make.config
+ 
+CFLAGS:=$(CFLAGS) $(KERNEL_ARCH_CFLAGS)
+LDFLAGS:=$(LDFLAGS) $(KERNEL_ARCH_LDFLAGS)
+LIBS:=$(LIBS) $(KERNEL_ARCH_LIBS)
+
+OBJS:=\
+$(KERNEL_ARCH_OBJS) \
+main.o \
+
+all: hobby-os.kernel
+
+.PHONY: all clean install
+
+hobby-os.kernel: $(OBJS) $(ARCHDIR)/linker.ld
+	i686-elf-gcc -T $(ARCHDIR)/linker.ld -o $@ $(CFLAGS) $(OBJS) $(LDFLAGS) $(LIBS)
+
+%.o: %.c
+	i686-elf-gcc -c $< -o $@ -std=gnu11 $(CFLAGS)
+ 
 %.o: %.asm
 	nasm -felf32 $< -o $@
 
-%.o: %.c
-	i686-elf-gcc -c $< -o $@ -std=gnu99 -ffreestanding -O2 -Wall -Wextra
-
-kernel.bin: boot.o main.o linker.ld
-	i686-elf-gcc -T linker.ld -o $(kernel) -ffreestanding -O2 -nostdlib boot.o main.o -lgcc
+clean:
+	rm -f hobby-os.kernel $(OBJS) *.o */*.o */*/*.o
+ 
+install: hobby-os.kernel
+	mkdir -p $(DESTDIR)$(BOOTDIR)
+	cp hobby-os.kernel $(DESTDIR)$(BOOTDIR)

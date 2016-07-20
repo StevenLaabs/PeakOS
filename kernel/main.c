@@ -1,12 +1,12 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "terminal.h"
+
 #if defined(__cplusplus)
 extern "C"
 #endif
 void kinit() 
 {
-	uint16_t* vga = (uint16_t*) 0xB8000;
-	
-	vga[0] = 0x4f524f45;
+	//init_terminal();
 }

@@ -1,4 +1,5 @@
-#include "vga.h";
+#include "terminal.h"
+#include "vga.h"
 
 static size_t cursor_x;
 static size_t cursor_y;
@@ -14,7 +15,7 @@ void init_terminal() {
 	clear_screen();
 }
 
-void clear_screen() {
+void terminal_clear() {
 	for(int i = 0; i < (SCREEN_WIDTH * SCREEN_HEIGHT); i++) {
 		VGA_PTR[i] = (color << 8) 
 	}

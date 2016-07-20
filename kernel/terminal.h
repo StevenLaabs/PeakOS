@@ -3,7 +3,7 @@
 
 void init_terminal();
 
-void clear_screen();
+void terminal_clear();
 void terminal_write();
 void terminal_putchar(unsigned char c);
 
