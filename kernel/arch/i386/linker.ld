@@ -1,13 +1,21 @@
 ENTRY(_boot_start)
 
 SECTIONS {
-	. = 0x100000;
+	. = 0x1M;
 
-	.multiboot : {
+	.text ALIGN(4k) : {
+		/* Put multiboot header at the beginning of memory so it is recognized */
 		*(.multiboot)
+		*(.text)
 	}
 
-	.text : {
-		*(.text)
+	/* .data is Read-write data that is initialized */
+	.data ALIGN(4k) : {
+		*(.data)
+	}	
+
+	/* .bss is Read-write data that is uninitialized and stack */
+	.bss ALIGN(4k) : {
+		*(.bss)
 	}
 }
