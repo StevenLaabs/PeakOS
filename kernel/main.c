@@ -8,5 +8,7 @@ extern "C"
 #endif
 void kinit() 
 {
-	//init_terminal();
+	terminal_init();
+
+	terminal_write("Hobby OS has been loaded.");
 }

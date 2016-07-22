@@ -28,6 +28,7 @@ LIBS:=$(LIBS) $(KERNEL_ARCH_LIBS)
 OBJS:=\
 $(KERNEL_ARCH_OBJS) \
 main.o \
+terminal.o \
 
 all: hobby-os.kernel
 

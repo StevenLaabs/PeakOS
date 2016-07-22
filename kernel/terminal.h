@@ -1,13 +1,15 @@
 #ifndef _terminal_h
 #define _terminal_h
 
-void init_terminal();
+#include <stddef.h>
+#include <stdint.h>
+
+void terminal_init();
 
 void terminal_clear();
-void terminal_write();
-void terminal_putchar(unsigned char c);
+void terminal_write(char * str);
+void terminal_putchar(char c);
 
-void set_background();
-void set_foreground();
+void terminal_setcolor(uint8_t text, uint8_t background);
 
 #endif
