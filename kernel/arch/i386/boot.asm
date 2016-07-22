@@ -24,10 +24,6 @@ GLOBAL _boot_start
 	multiboot_info_structure dd 0
 ; END - multiboot configured
 
-stack_bottom:
-	times 65536 db 0                            ; Allocate 64 KiB memory for the stack 
-stack_top:
-
 ; BEGIN - allocate memory for a GDT with entries that span the whole address space
 gdt_start:
 	db 0, 0, 0, 0, 0, 0, 0, 0
@@ -112,3 +108,19 @@ hang:
 	hlt
 	jmp hang
 
+section .bss
+GLOBAL page_table_1
+GLOBAL page_directory
+
+align 4
+stack_bottom:
+	resb 0x4000                            ; Allocate 16k memory for the stack 
+stack_top:
+
+align 4096
+
+page_table_1:
+	resb (1024 * 1024 * 4)                 ; 1024 tables, 1024 entries per table, 4 bytes per entry
+
+page_directory:
+	resb (1 * 1024 * 4)                    ; 1 directory with 1024 table entries, 4 bytes per entry
