@@ -38,7 +38,7 @@ hobby-os.kernel: $(OBJS) $(ARCHDIR)/linker.ld
 	i686-elf-gcc -T $(ARCHDIR)/linker.ld -o $@ $(CFLAGS) $(OBJS) $(LDFLAGS) $(LIBS)
 
 %.o: %.c
-	i686-elf-gcc -c $< -o $@ -std=gnu11 $(CFLAGS)
+	i686-elf-gcc -c -masm=intel $< -o $@ -std=gnu11 $(CFLAGS)
  
 %.o: %.asm
 	nasm -felf32 $< -o $@

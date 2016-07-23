@@ -4,66 +4,65 @@
 #include "terminal.h"
 
 #define NUM_ENTRIES 1024
+#define NUM_TABLES 1024
 #define VIRTUAL_BASE_ADDR 0xC0000000
-#define PAGE_DIR_INDEX (VIRTUAL_BASE_ADDR >> 22)
+#define KERNEL_PAGE_INDEX (VIRTUAL_BASE_ADDR >> 22)
 
-extern uint32_t page_table_1[NUM_ENTRIES];
+extern uint32_t page_tables[NUM_ENTRIES * NUM_TABLES];
 extern uint32_t page_directory[NUM_ENTRIES];
 
 void load_page_dir(uint32_t * directory);
-void enable_paging();
-void start_in_higher_half();
 
 void paging_init()
 {
 	// Get physical addresses of the page tables to identity map
-	uint32_t * physical_page_table_1 = (uint32_t *)((uint32_t) page_table_1 - VIRTUAL_BASE_ADDR);
+	uint32_t * physical_page_table_1 = (uint32_t *)((uint32_t) page_tables - VIRTUAL_BASE_ADDR);
 	uint32_t * physical_page_directory = (uint32_t *)((uint32_t) page_directory - VIRTUAL_BASE_ADDR);
 
-	// initialize page directory for empty entries
+	uint32_t flags = 3;
+	uint32_t num_page_tables = 4;
+	uint32_t size_of_tables = num_page_tables * NUM_ENTRIES;
+
+	// initialize page table entries
+	for(unsigned int i = 0; i < size_of_tables; i++)
+	{
+		physical_page_table_1[i] = (i * 4096) | flags;
+	}
+
+	// identity map the kernel addresses in the page table
+	uint32_t start_entry_index = (KERNEL_PAGE_INDEX * 1024);
+	for(unsigned int i = 0; i < size_of_tables; i++)
+	{
+		physical_page_table_1[i + start_entry_index] = (i * 4096) | flags;
+	}
+
+	// map the page directory to the tables
+	start_entry_index = (uint32_t)physical_page_table_1;
 	for(unsigned int i = 0; i < NUM_ENTRIES; i++)
 	{
-		physical_page_directory[i] = 0x2;
+		physical_page_directory[i] = (start_entry_index + (i * 4096)) | flags;
 	}
 
-	// initialize the page table with read/write and present bits
-	for(unsigned int i = 0; i < NUM_ENTRIES; i++)
-	{
-		physical_page_table_1[i] = (i * 4096) | 3;
-	}
-
-	uint32_t start_entry_index = PAGE_DIR_INDEX * 1024;
-	for(unsigned int i = 0; i < (NUM_ENTRIES + start_entry_index); i++)
-	{
-		physical_page_table_1[i] = (i * 4096) | 3;
-	}
-
-	// set the first entry in the directory to the page table
-	physical_page_directory[0] = ((uint32_t)physical_page_table_1) | 3;
-
-	// initialize the page directory
-	//for(unsigned int i = 0; i < NUM_ENTRIES; i++)
-	//{
-	//	// Read/Write enabled but page is not present
-	//	page_directory[i] = 0x2;
-	//}
-
-	// initialize the page_table
-	//for(unsigned int i = 0; i < NUM_ENTRIES; i++)
-	//{
-	//	// Read/Write enabled and page present
-	//	page_table_1[i] = (i * 4096) | 3;
-	//}
-
-	//page_directory[0] = ((uint32_t)page_table_1) | 3;
-
-	load_page_dir(page_directory);
-	enable_paging();
-	
+	// load page directory pointer into cr3
 	__asm__
 	(
-		"lea higher_half, %ecx\n"
-		"jmp *%ecx\n"
+		"lea ecx, [page_directory - 0xC0000000]\n"
+		"mov cr3, ecx\n"
+	);
+
+	// initialize paging by setting bit 31 in cr0
+	__asm__
+	(
+		"mov ecx, cr0\n"
+		"or ecx, 0x80000000\n"
+		"mov cr0, ecx\n"
+	);
+
+	// long jump to the higher half address for the kernel
+	__asm__
+	(
+		"lea ecx, [higher_half]\n"
+		"jmp ecx\n"
 		"higher_half:\n"
 		"nop\n"
 	);
@@ -74,11 +73,11 @@ extern "C"
 #endif
 void kinit() 
 {
+	paging_init();
+
 	terminal_init();
 
 	terminal_write("Hobby OS has been loaded...");
 
-	//paging_init();
-
-	//terminal_write(" Paging enabled...");
+	terminal_write(" Paging enabled...");
 }

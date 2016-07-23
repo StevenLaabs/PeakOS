@@ -16,7 +16,7 @@ align 4
 	dd CHECKSUM
 
 VIRTUAL_BASE_ADDR equ 0xC0000000                ; Base virtual address for higher-half
-PAGE_DIR_INDEX equ (VIRTUAL_BASE_ADDR >> 22)    ; Page directory index of kernel
+KERNEL_PAGE_INDEX equ (VIRTUAL_BASE_ADDR >> 22)    ; Page directory index of kernel
 
 section .text
 GLOBAL _boot_start
@@ -113,7 +113,7 @@ hang:
 	jmp hang
 
 section .bss
-GLOBAL page_table_1
+GLOBAL page_tables
 GLOBAL page_directory
 
 align 4
@@ -123,8 +123,8 @@ stack_top:
 
 align 4096
 
-page_table_1:
-	resb (1 * 1024 * 4)                 ; 1 table, 1024 entries per table, 4 bytes per entry
+page_tables:
+	resb (1024 * 1024 * 4)                 ; 1024 table, 1024 entries per table, 4 bytes per entry
 
 page_directory:
 	resb (1 * 1024 * 4)                    ; 1 directory with 1024 table entries, 4 bytes per entry
