@@ -29,6 +29,7 @@ OBJS:=\
 $(KERNEL_ARCH_OBJS) \
 main.o \
 terminal.o \
+paging.o \
 
 all: hobby-os.kernel
 
