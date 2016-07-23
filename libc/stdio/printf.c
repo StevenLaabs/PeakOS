@@ -1,14 +1,45 @@
 #include <stdio.h>
-
-static void print(const char* data, size_t length)
-{
-	for(unsigned int i = 0; i < length; i++)
-	{
-		putchar((int)((const unsigned char *)data)[i]);
-	}
-}
+#include <stdarg.h>
 
 int printf(const char *format, ...)
 {
-	// do printf	
+	va_list args;
+	va_start(args, format);
+
+	const char * parse;
+	unsigned int written = 0;
+	int i;
+	char *s;
+
+	for(parse = format; *parse != '\0'; parse++)
+	{
+		if(*parse != '%')
+		{
+			putchar((int)(*parse));
+			written++;
+			continue;
+		}
+
+		parse++;
+
+		switch(*parse)
+		{
+			case 'c':
+				i = va_arg(args, int);
+				putchar(i);
+				break;
+
+			case 's':
+				s = va_arg(args, char*);
+				puts(s);
+				break;
+
+			default:
+				break;// err
+		}
+	}
+
+	va_end(args);
+
+	return written;
 }
