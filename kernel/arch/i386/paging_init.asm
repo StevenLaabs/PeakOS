@@ -1,6 +1,7 @@
 section .text
 GLOBAL load_page_dir
 GLOBAL enable_paging
+GLOBAL start_in_higher_half
 
 load_page_dir:
 	mov eax, [esp+4]

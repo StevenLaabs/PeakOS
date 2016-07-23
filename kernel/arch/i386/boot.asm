@@ -15,6 +15,9 @@ align 4
 	dd FLAGS
 	dd CHECKSUM
 
+VIRTUAL_BASE_ADDR equ 0xC0000000                ; Base virtual address for higher-half
+PAGE_DIR_INDEX equ (VIRTUAL_BASE_ADDR >> 22)    ; Page directory index of kernel
+
 section .text
 GLOBAL _boot_start
 
@@ -43,17 +46,17 @@ _boot_start:
 	; BEGIN - check multiboot load
 	mov dword ecx, 0x2BADB002
 	cmp eax, ecx                                ; If multiboot loaded correctly, 0x2BADB002 will be in eax
-	jne multiboot_error                         ; Handle the error if multiboot doesn't load for some reason
+	jne (multiboot_error - VIRTUAL_BASE_ADDR)   ; Handle the error if multiboot doesn't load for some reason
 	; END - check multiboot load
 
 	; BEGIN - save info from the multiboot info structure
-	mov dword [multiboot_info_structure], ebx   ; ebx contains address of multiboot info structure
-	add dword ebx, 0x4                          ; set ebx to the mem_lower bits in the info structure
-	mov dword eax, [ebx]                        ; set eax to the mem_lower values 
-	mov dword [multiboot_mem_low], eax          ; save the mem_lower values to multiboot_mem_low
-	add dword ebx, 0x4                          ; set ebx to the mem_upper bits in the info structure
-	mov dword eax, [ebx]                        ; set eax to the mem_upper values
-	mov dword [multiboot_mem_high], eax         ; save the mem_upper values to multiboot_mem_high
+	mov dword [multiboot_info_structure - VIRTUAL_BASE_ADDR], ebx ; ebx contains address of multiboot info structure
+	add dword ebx, 0x4                                            ; set ebx to the mem_lower bits in the info structure
+	mov dword eax, [ebx]                                          ; set eax to the mem_lower values 
+	mov dword [multiboot_mem_low - VIRTUAL_BASE_ADDR], eax        ; save the mem_lower values to multiboot_mem_low
+	add dword ebx, 0x4                                            ; set ebx to the mem_upper bits in the info structure
+	mov dword eax, [ebx]                                          ; set eax to the mem_upper values
+	mov dword [multiboot_mem_high - VIRTUAL_BASE_ADDR], eax       ; save the mem_upper values to multiboot_mem_high
 	; END - save multiboot info structure
 
 	; BEGIN - set protected mode
@@ -62,16 +65,16 @@ _boot_start:
 	mov dword cr0, ebx
 	; END - protected mode set
 
-	mov esp, stack_top                          ; Set the stack pointer to the top of the stack 
+	mov esp, (stack_top - VIRTUAL_BASE_ADDR)    ; Set the stack pointer to the top of the stack 
 
 	; BEGIN - set up gdt
-	mov dword [gdt_ptr + 2], gdt_start          ; set the mem location of the gdt to the appropriate header
-	mov dword eax, gdt_ptr
+	mov dword [gdt_ptr - VIRTUAL_BASE_ADDR + 2], (gdt_start - VIRTUAL_BASE_ADDR) ; set the mem location of the gdt to the appropriate header
+	mov dword eax, (gdt_ptr - VIRTUAL_BASE_ADDR)
 	lgdt [eax]                                  ; load the gdt at the specified location
 	; END - gdt set up
 
 	; BEGIN - flush registers and load into the new segment registers
-	jmp 0x08:.flush_cs                          ; 0x08 points to new code selector
+	jmp 0x08:(.flush_cs - VIRTUAL_BASE_ADDR)    ; 0x08 points to new code selector
 
 .flush_cs:
 	
@@ -85,7 +88,8 @@ _boot_start:
 	; END - registers reloaded
 
 	extern kinit
-	call kinit
+	lea eax, [kinit - VIRTUAL_BASE_ADDR]
+	call eax
 
 	jmp hang
 
