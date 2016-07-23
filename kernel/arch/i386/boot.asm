@@ -120,7 +120,7 @@ stack_top:
 align 4096
 
 page_table_1:
-	resb (1024 * 1024 * 4)                 ; 1024 tables, 1024 entries per table, 4 bytes per entry
+	resb (1 * 1024 * 4)                 ; 1 table, 1024 entries per table, 4 bytes per entry
 
 page_directory:
 	resb (1 * 1024 * 4)                    ; 1 directory with 1024 table entries, 4 bytes per entry
