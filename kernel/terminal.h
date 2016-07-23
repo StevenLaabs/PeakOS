@@ -7,6 +7,8 @@
 void terminal_init();
 
 void terminal_clear();
+void terminal_scroll();
+
 void terminal_write(char * str);
 void terminal_putchar(char c);
 

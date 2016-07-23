@@ -13,7 +13,7 @@ void kinit()
 
 	terminal_init();
 
-	terminal_write("Hobby OS has been loaded...");
+	terminal_write("Hobby OS has been loaded...\n");
 
-	terminal_write(" Paging enabled with higher half...");
+	terminal_write("Paging enabled with higher half...");
 }

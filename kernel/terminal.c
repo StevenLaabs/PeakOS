@@ -24,6 +24,17 @@ void terminal_clear()
 	}
 }
 
+void terminal_scroll()
+{
+	for(int y = 0; y < VGA_SCREEN_HEIGHT; y++)
+	{
+		for(int x = 0; x < VGA_SCREEN_WIDTH; x++)
+		{
+			VGA_PTR[y * VGA_SCREEN_WIDTH + x] = VGA_PTR[(y+1) * VGA_SCREEN_WIDTH + x];
+		}
+	}
+}
+
 void terminal_write(char * str)
 {
 	int index = 0;
@@ -35,19 +46,37 @@ void terminal_write(char * str)
 
 void terminal_putchar(char c)
 {
-	VGA_PTR[cursor_y * VGA_SCREEN_WIDTH + cursor_x] = vga_get_entry(c, color);
-	
-	cursor_x++;
-
-	if(cursor_x > VGA_SCREEN_WIDTH)
+	switch(c)
 	{
-		cursor_x = 0;
-		cursor_y++;
+		case '\n':
+			cursor_x = 0;
+			cursor_y++;
+			break;
 
-		if(cursor_y > VGA_SCREEN_HEIGHT)
-		{
-			// scroll screen
-		}
+		case '\t':
+			cursor_x += 4;
+			if(cursor_x > VGA_SCREEN_WIDTH)
+			{
+				cursor_x = 4;
+				cursor_y++;
+			}
+			break;
+
+		default:
+			VGA_PTR[cursor_y * VGA_SCREEN_WIDTH + cursor_x] = vga_get_entry(c, color);
+			cursor_x++;
+			if(cursor_x > VGA_SCREEN_WIDTH)
+			{
+				cursor_x = 0;
+				cursor_y++;
+			}
+			break;
+	}
+
+	if(cursor_y > VGA_SCREEN_HEIGHT)
+	{
+		terminal_scroll();
+		cursor_y = VGA_SCREEN_HEIGHT;
 	}
 }
 
