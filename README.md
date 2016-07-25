@@ -1,12 +1,12 @@
-Hobby OS
+PeakOS
 ======
-**Hobby OS** is a personal project to learn about the development of operating systems.
+**PeakOS** is a hobby operating system.
 
 ## Screenshots
-![Boot](https://raw.githubusercontent.com/StevenLaabs/hobby-os/master/images/basic_init.png)
+![Boot](https://raw.githubusercontent.com/StevenLaabs/PeakOS/master/images/basic_init.png)
 
 ## Download
-* [Current](https://github.com/StevenLaabs/hobby-os/archive/master.zip)
+* [Current](https://github.com/StevenLaabs/PeakOS/archive/master.zip)
 * No other versions are available at this time
 
 ## Building and running
@@ -16,7 +16,7 @@ Hobby OS
 * qemu
 
 ```bash
-$ git clone https://github.com/StevenLaabs/hobby-os.git
+$ git clone https://github.com/StevenLaabs/PeakOS.git
 $ ./build.sh
 $ ./start.sh
 ```
