@@ -21,6 +21,9 @@ KERNEL_PAGE_INDEX equ (VIRTUAL_BASE_ADDR >> 22)    ; Page directory index of ker
 section .text
 GLOBAL _boot_start
 
+GLOBAL idt_pointer
+GLOBAL idt_contents
+
 ; BEGIN - configure multiboot 
 	multiboot_mem_high dd 0
 	multiboot_mem_low dd 0
@@ -39,6 +42,9 @@ gdt_start:
 gdt_ptr db 39, 0, 0, 0, 0, 0                    ; first 2 bytes - size of table, last 4 bytes - location in memory
 
 ; END - allocating memory for GDT
+
+idt_contents: TIMES 2048 db 0
+idt_pointer db 0xFF, 0x7, 0, 0, 0, 0
 
 _boot_start:
 	cli

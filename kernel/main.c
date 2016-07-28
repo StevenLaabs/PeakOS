@@ -68,11 +68,12 @@ void kinit()
 	terminal_write("IDT initialized...\n");
 	terminal_write("Testing interrupt handlers...\n");
 
-	//unsigned int i = 0x400000;
-	//while(i-- > 0) {}
+	unsigned int i = 0xF00000;
+	while(i-- > 0) {}
 
-	//for(unsigned char i = 0; i < 21; i++)
-	//{
-	//	issue_interrupt(i);
-	//}
+	for(uint8_t i = 0; i < 21; i++)
+	{
+		issue_interrupt(i);
+	}
+
 }

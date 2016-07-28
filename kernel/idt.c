@@ -1,10 +1,13 @@
-#include "idt.h"
+#include "idt.h"	
 #include "terminal.h"
 
 // macro defines a function for the interrupt handler number
 #define NEW_INTERRUPT_HANDLER(i) extern void interrupt_handler_##i(void)
 
 #define IDT_SET_GATE(index) idt_set_gate(index, (uint32_t)&interrupt_handler_##index, 0x08, 0x8E); 
+
+extern uint32_t idt_pointer;
+extern uint32_t idt_contents;
 
 // Exception interrupts go 0-20: http://wiki.osdev.org/Exceptions
 NEW_INTERRUPT_HANDLER(0);
@@ -49,12 +52,9 @@ NEW_INTERRUPT_HANDLER(47);
 
 void interrupt_handler(int int_num)
 {
-	terminal_clear();
-	terminal_write("Interrupt number ");
+	terminal_write("Interrupt: ");
 	terminal_putchar((char)(int_num + 48));
-
-	unsigned int i = 0x400000;
-	while(i-- > 0) {}
+	terminal_putchar('\n');
 }
 
 void idt_set_gate(uint8_t index, uint32_t isr_adr, uint16_t selector, uint8_t flags)
@@ -62,17 +62,19 @@ void idt_set_gate(uint8_t index, uint32_t isr_adr, uint16_t selector, uint8_t fl
 	idt[index].offset1 = (isr_adr & 0xFFFF);
 	idt[index].offset2 = ((isr_adr >> 16) & 0xFFFF);
 	idt[index].selector = selector;
-	idt[index].flags = flags;
+	idt[index].gate_type = 0xE;
+	idt[index].storage_segment = 0x0;
+	idt[0].dpl = 0x0;
+	idt[0].present = 0x1;
 	idt[index].zero = 0;
 }
 
 void idt_init()
 {
-	idtp.base = (uint32_t)&idt;
-	idtp.limit = (sizeof(struct idt_entry) * 256) - 1;
+	idt = (struct idt_entry_t*)idt_contents;
 
 	// exceptions
-	/*IDT_SET_GATE(0);
+	IDT_SET_GATE(0);
 	IDT_SET_GATE(1);
 	IDT_SET_GATE(2);
 	IDT_SET_GATE(3);
@@ -111,10 +113,14 @@ void idt_init()
 	IDT_SET_GATE(45);
 	IDT_SET_GATE(46);
 	IDT_SET_GATE(47);
-*/
+
+	idt_ptr = (struct idt_pointer_t*)idt_pointer;
+	idt_ptr->limit = (uint16_t)((256 * sizeof(struct idt_entry_t)) -1);
+	idt_ptr->base = idt;
+
 	__asm__
 	(
-		"mov eax, [idtp]\n"
+		"mov eax, [idt_pointer]\n"
 		"lidt [eax]"
 	);
 }
