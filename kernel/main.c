@@ -71,9 +71,10 @@ void kinit()
 	unsigned int i = 0xF00000;
 	while(i-- > 0) {}
 
-	for(uint8_t i = 0; i < 21; i++)
+/*	for(uint8_t i = 0; i < 21; i++)
 	{
 		issue_interrupt(i);
 	}
-
+*/
+	issue_interrupt(42);
 }

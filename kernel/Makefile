@@ -30,6 +30,7 @@ $(KERNEL_ARCH_OBJS) \
 main.o \
 terminal.o \
 paging.o \
+pic.o \
 idt_asm.o \
 idt.o \
 

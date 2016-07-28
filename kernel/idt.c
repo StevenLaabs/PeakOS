@@ -1,5 +1,6 @@
 #include "idt.h"	
 #include "terminal.h"
+#include "pic.h"
 
 // macro defines a function for the interrupt handler number
 #define NEW_INTERRUPT_HANDLER(i) extern void interrupt_handler_##i(void)
@@ -55,6 +56,19 @@ void interrupt_handler(int int_num)
 	terminal_write("Interrupt: ");
 	terminal_putchar((char)(int_num + 48));
 	terminal_putchar('\n');
+
+	if(int_num >= 32 && int_num < 48)
+	{
+		terminal_write("Handling IRQ\n");
+
+		if(int_num >= 40)
+		{
+			// slave PIC IRQ
+			outb(0xA0, 0x20);
+		}
+
+		outb(0x20, 0x20); // end of interrupt
+	}
 }
 
 void idt_set_gate(uint8_t index, uint32_t isr_adr, uint16_t selector, uint8_t flags)
@@ -123,4 +137,6 @@ void idt_init()
 		"mov eax, [idt_pointer]\n"
 		"lidt [eax]"
 	);
+
+	pic_map(0x20, 0x28);
 }
