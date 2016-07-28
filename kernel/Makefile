@@ -20,7 +20,7 @@ LIBS:=$(LIBS) -nostdlib -lgcc
 ARCHDIR:=arch/$(HOSTARCH)
 
 include $(ARCHDIR)/make.config
- 
+
 CFLAGS:=$(CFLAGS) $(KERNEL_ARCH_CFLAGS)
 LDFLAGS:=$(LDFLAGS) $(KERNEL_ARCH_LDFLAGS)
 LIBS:=$(LIBS) $(KERNEL_ARCH_LIBS)
@@ -30,6 +30,7 @@ $(KERNEL_ARCH_OBJS) \
 main.o \
 terminal.o \
 paging.o \
+io.o \
 pic.o \
 idt_asm.o \
 idt.o \
@@ -43,13 +44,13 @@ hobby-os.kernel: $(OBJS) $(ARCHDIR)/linker.ld
 
 %.o: %.c
 	i686-elf-gcc -c -masm=intel $< -o $@ -std=gnu11 $(CFLAGS)
- 
+
 %.o: %.asm
 	nasm -felf32 $< -o $@
 
 clean:
 	rm -f hobby-os.kernel $(OBJS) *.o */*.o */*/*.o
- 
+
 install: hobby-os.kernel
 	mkdir -p $(DESTDIR)$(BOOTDIR)
 	cp hobby-os.kernel $(DESTDIR)$(BOOTDIR)
