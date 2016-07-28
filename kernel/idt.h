@@ -19,3 +19,10 @@ struct idt_entry
 
 struct idt_entry idt[256]; // 256 interrupt entries in the IDT
 struct idt_pointer idtp;   // pointer info for the IDT
+
+// Sets a gate or entry within the IDT at the given index
+// the isr_adr is the address of the implemented interrupt method
+// see https://www-s.acm.illinois.edu/sigops/2007/roll_your_own/i386/boot.html#predefsel for selector info
+static void idt_set_gate(uint8_t index, uint32_t isr_adr, uint16_t selector, uint8_t flags);
+
+void idt_init();

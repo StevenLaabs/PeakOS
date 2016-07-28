@@ -30,6 +30,8 @@ $(KERNEL_ARCH_OBJS) \
 main.o \
 terminal.o \
 paging.o \
+idt_asm.o \
+idt.o \
 
 all: hobby-os.kernel
 
