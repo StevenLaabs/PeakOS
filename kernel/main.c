@@ -68,5 +68,10 @@ void kinit()
 	terminal_write("IDT initialized...\n");
 	terminal_write("Testing interrupt handlers...\n");
 
+	/*for(int i = 0; i < 48; i++)
+	{
+		issue_interrupt(i);
+	}*/
+
 	while(1) { asm("hlt"); }
 }

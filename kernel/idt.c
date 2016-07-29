@@ -65,23 +65,23 @@ NEW_INTERRUPT_HANDLER(47);
 
 void interrupt_handler(int int_num)
 {
-	outb(0xe9, (uint8_t)int_num); // output to bochs e9 hack
-
-	asm("xchg bx, bx"); // bochs magic breakpoint
-
 	terminal_write("Interrupt: ");
 	terminal_writeint(int_num, 10);
 	terminal_putchar('\n');
 
-	if(int_num == 33)
+	if(int_num == 32)
 	{
 		// this is the timer
+	}
+	else if(int_num == 33)
+	{
+		inb(0x60);
 	}
 
 	if(int_num >= 32 && int_num < 48)
 	{
 		terminal_write("IRQ #: ");
-		terminal_writeint(int_num - 32, 10);
+		terminal_writeint(int_num - 31, 10);
 		terminal_putchar('\n');
 
 		irq_send_eoi(int_num - 32);
@@ -95,8 +95,8 @@ void idt_set_gate(uint8_t index, uint32_t isr_adr, uint16_t selector, uint8_t fl
 	idt[index].selector = selector;
 	idt[index].gate_type = 0xE;
 	idt[index].storage_segment = 0x0;
-	idt[0].dpl = 0x0;
-	idt[0].present = 0x1;
+	idt[index].dpl = 0x0;
+	idt[index].present = 0x1;
 	idt[index].zero = 0;
 }
 
