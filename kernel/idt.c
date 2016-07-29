@@ -33,6 +33,18 @@ NEW_INTERRUPT_HANDLER(18);
 NEW_INTERRUPT_HANDLER(19);
 NEW_INTERRUPT_HANDLER(20);
 
+NEW_INTERRUPT_HANDLER(21);
+NEW_INTERRUPT_HANDLER(22);
+NEW_INTERRUPT_HANDLER(23);
+NEW_INTERRUPT_HANDLER(24);
+NEW_INTERRUPT_HANDLER(25);
+NEW_INTERRUPT_HANDLER(26);
+NEW_INTERRUPT_HANDLER(27);
+NEW_INTERRUPT_HANDLER(28);
+NEW_INTERRUPT_HANDLER(29);
+NEW_INTERRUPT_HANDLER(30);
+NEW_INTERRUPT_HANDLER(31);
+
 // IRQ interrupts typically go from 32-47
 NEW_INTERRUPT_HANDLER(32);
 NEW_INTERRUPT_HANDLER(33);
@@ -53,6 +65,10 @@ NEW_INTERRUPT_HANDLER(47);
 
 void interrupt_handler(int int_num)
 {
+	outb(0xe9, (uint8_t)int_num); // output to bochs e9 hack
+
+	asm("xchg bx, bx"); // bochs magic breakpoint
+
 	terminal_write("Interrupt: ");
 	terminal_writeint(int_num, 10);
 	terminal_putchar('\n');
@@ -117,6 +133,18 @@ void idt_init()
 	IDT_SET_GATE(19);
 	IDT_SET_GATE(20);
 
+	IDT_SET_GATE(21);
+	IDT_SET_GATE(22);
+	IDT_SET_GATE(23);
+	IDT_SET_GATE(24);
+	IDT_SET_GATE(25);
+	IDT_SET_GATE(26);
+	IDT_SET_GATE(27);
+	IDT_SET_GATE(28);
+	IDT_SET_GATE(29);
+	IDT_SET_GATE(30);
+	IDT_SET_GATE(31);
+
 	// IRQ's
 	IDT_SET_GATE(32);
 	IDT_SET_GATE(33);
@@ -148,12 +176,12 @@ void idt_init()
 	pic_map(0x20, 0x28);
 
 	// unmask the timer and keyboard IRQs so they can be used
-	irq_mask(IRQ_TIMER);
+	irq_unmask(IRQ_TIMER);
 	irq_unmask(IRQ_KEYBOARD);
 
-	/*__asm__
+	__asm__
 	(
 		"sti\n"
 		"nop\n"
-	);*/
+	);
 }

@@ -38,6 +38,18 @@ interrupt_handler_macro 18
 interrupt_handler_macro 19
 interrupt_handler_macro 20
 
+interrupt_handler_macro 21
+interrupt_handler_macro 22
+interrupt_handler_macro 23
+interrupt_handler_macro 24
+interrupt_handler_macro 25
+interrupt_handler_macro 26
+interrupt_handler_macro 27
+interrupt_handler_macro 28
+interrupt_handler_macro 29
+interrupt_handler_macro 30
+interrupt_handler_macro 31
+
 interrupt_handler_macro 32
 interrupt_handler_macro 33
 interrupt_handler_macro 34
