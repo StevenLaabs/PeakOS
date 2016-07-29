@@ -7,7 +7,7 @@ GLOBAL interrupt_handler_%1
 
 interrupt_handler_%1:
 	pushad
-	
+
 	push dword %1
 	call interrupt_handler
 	add esp, 4

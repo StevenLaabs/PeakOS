@@ -11,6 +11,7 @@ void terminal_scroll();
 
 void terminal_write(char * str);
 void terminal_putchar(char c);
+void terminal_writeint(int val, int base);
 
 void terminal_setcolor(uint8_t text, uint8_t background);
 

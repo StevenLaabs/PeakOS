@@ -7,4 +7,12 @@
 
 #define PIC_EOI 0x20
 
+#define IRQ_TIMER 0
+#define IRQ_KEYBOARD 1
+
 void pic_map(int offset1, int offset2);
+
+void irq_mask(uint8_t irq);
+void irq_unmask(uint8_t irq);
+
+void irq_send_eoi(uint8_t irq);

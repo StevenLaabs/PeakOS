@@ -1,11 +1,11 @@
-#include "idt.h"	
+#include "idt.h"
 #include "terminal.h"
 #include "pic.h"
 
 // macro defines a function for the interrupt handler number
 #define NEW_INTERRUPT_HANDLER(i) extern void interrupt_handler_##i(void)
 
-#define IDT_SET_GATE(index) idt_set_gate(index, (uint32_t)&interrupt_handler_##index, 0x08, 0x8E); 
+#define IDT_SET_GATE(index) idt_set_gate(index, (uint32_t)&interrupt_handler_##index, 0x08, 0x8E);
 
 extern uint32_t idt_pointer;
 extern uint32_t idt_contents;
@@ -54,20 +54,21 @@ NEW_INTERRUPT_HANDLER(47);
 void interrupt_handler(int int_num)
 {
 	terminal_write("Interrupt: ");
-	terminal_putchar((char)(int_num + 48));
+	terminal_writeint(int_num, 10);
 	terminal_putchar('\n');
+
+	if(int_num == 33)
+	{
+		// this is the timer
+	}
 
 	if(int_num >= 32 && int_num < 48)
 	{
-		terminal_write("Handling IRQ\n");
+		terminal_write("IRQ #: ");
+		terminal_writeint(int_num - 32, 10);
+		terminal_putchar('\n');
 
-		if(int_num >= 40)
-		{
-			// slave PIC IRQ
-			outb(0xA0, 0x20);
-		}
-
-		outb(0x20, 0x20); // end of interrupt
+		irq_send_eoi(int_num - 32);
 	}
 }
 
@@ -85,6 +86,12 @@ void idt_set_gate(uint8_t index, uint32_t isr_adr, uint16_t selector, uint8_t fl
 
 void idt_init()
 {
+	__asm__
+	(
+		"cli\n"
+		"nop\n"
+	);
+
 	idt = (struct idt_entry_t*)idt_contents;
 
 	// exceptions
@@ -139,4 +146,14 @@ void idt_init()
 	);
 
 	pic_map(0x20, 0x28);
+
+	// unmask the timer and keyboard IRQs so they can be used
+	irq_mask(IRQ_TIMER);
+	irq_unmask(IRQ_KEYBOARD);
+
+	/*__asm__
+	(
+		"sti\n"
+		"nop\n"
+	);*/
 }

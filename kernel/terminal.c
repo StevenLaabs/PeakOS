@@ -44,6 +44,19 @@ void terminal_write(char * str)
 	}
 }
 
+void terminal_writeint(int val, int base)
+{
+	static char buf[32] = {0};
+		
+	int i = 30;
+			
+	for(; val && i ; --i, val /= base)
+				
+	buf[i] = "0123456789abcdef"[val % base];
+	
+	terminal_write(&buf[i+1]);
+}
+
 void terminal_putchar(char c)
 {
 	switch(c)

@@ -40,7 +40,7 @@ void issue_interrupt(unsigned char i)
 		case 39: __asm__("int 39\n"); break;
 		case 40: __asm__("int 40\n"); break;
 		case 41: __asm__("int 41\n"); break;
-		case 42: __asm__("int 42\n"); break; 
+		case 42: __asm__("int 42\n"); break;
 		case 43: __asm__("int 43\n"); break;
 		case 44: __asm__("int 44\n"); break;
 		case 45: __asm__("int 45\n"); break;
@@ -53,7 +53,7 @@ void issue_interrupt(unsigned char i)
 #if defined(__cplusplus)
 extern "C"
 #endif
-void kinit() 
+void kinit()
 {
 	paging_init();
 
@@ -68,13 +68,7 @@ void kinit()
 	terminal_write("IDT initialized...\n");
 	terminal_write("Testing interrupt handlers...\n");
 
-	unsigned int i = 0xF00000;
-	while(i-- > 0) {}
+	issue_interrupt(47);
 
-/*	for(uint8_t i = 0; i < 21; i++)
-	{
-		issue_interrupt(i);
-	}
-*/
-	issue_interrupt(42);
+	while(1) { asm("hlt"); }
 }
