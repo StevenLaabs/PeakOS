@@ -31,6 +31,7 @@ main.o \
 terminal.o \
 paging.o \
 io.o \
+keyboard.o \
 pic.o \
 idt_asm.o \
 idt.o \

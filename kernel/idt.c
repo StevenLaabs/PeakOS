@@ -65,26 +65,25 @@ NEW_INTERRUPT_HANDLER(47);
 
 void interrupt_handler(int int_num)
 {
-	terminal_write("Interrupt: ");
-	terminal_writeint(int_num, 10);
-	terminal_putchar('\n');
-
 	if(int_num == 32)
 	{
 		// this is the timer
 	}
 	else if(int_num == 33)
 	{
-		inb(0x60);
+		keyboard_handler();
 	}
 
 	if(int_num >= 32 && int_num < 48)
 	{
-		terminal_write("IRQ #: ");
-		terminal_writeint(int_num - 31, 10);
-		terminal_putchar('\n');
-
 		irq_send_eoi(int_num - 32);
+	}
+
+	else
+	{
+		terminal_write("Interrupt: ");
+		terminal_writeint(int_num, 10);
+		terminal_putchar('\n');
 	}
 }
 
@@ -178,6 +177,11 @@ void idt_init()
 	// unmask the timer and keyboard IRQs so they can be used
 	irq_unmask(IRQ_TIMER);
 	irq_unmask(IRQ_KEYBOARD);
+
+	// configure PIT to be slow rate generator
+	outb(PIT_CMD_PORT, 0x34);
+	outb(PIT_CH0_PORT, 0xFF);
+	outb(PIT_CH0_PORT, 0xFF);
 
 	__asm__
 	(
