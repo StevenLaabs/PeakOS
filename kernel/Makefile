@@ -36,11 +36,11 @@ pic.o \
 idt_asm.o \
 idt.o \
 
-all: hobby-os.kernel
+all: peakos.kernel
 
 .PHONY: all clean install
 
-hobby-os.kernel: $(OBJS) $(ARCHDIR)/linker.ld
+peakos.kernel: $(OBJS) $(ARCHDIR)/linker.ld
 	i686-elf-gcc -T $(ARCHDIR)/linker.ld -o $@ $(CFLAGS) $(OBJS) $(LDFLAGS) $(LIBS)
 
 %.o: %.c
@@ -50,8 +50,8 @@ hobby-os.kernel: $(OBJS) $(ARCHDIR)/linker.ld
 	nasm -felf32 $< -o $@
 
 clean:
-	rm -f hobby-os.kernel $(OBJS) *.o */*.o */*/*.o
+	rm -f peakos.kernel $(OBJS) *.o */*.o */*/*.o
 
-install: hobby-os.kernel
+install: peakos.kernel
 	mkdir -p $(DESTDIR)$(BOOTDIR)
-	cp hobby-os.kernel $(DESTDIR)$(BOOTDIR)
+	cp peakos.kernel $(DESTDIR)$(BOOTDIR)
