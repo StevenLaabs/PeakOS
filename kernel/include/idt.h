@@ -1,3 +1,6 @@
+#ifndef _IDT_H
+#define _IDT_H
+
 #include <stdint.h>
 
 #define PIT_CH0_PORT 0x40
@@ -34,3 +37,5 @@ struct idt_pointer_t* idt_ptr;   // pointer info for the IDT
 void idt_set_gate(uint8_t index, uint32_t isr_adr, uint16_t selector, uint8_t flags);
 
 void idt_init();
+
+#endif

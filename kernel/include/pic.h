@@ -1,3 +1,6 @@
+#ifndef _PIC_H
+#define _PIC_H
+
 #include "io.h"
 
 #define PICM_COMMAND 0x20 // new offset for master PIC
@@ -16,3 +19,5 @@ void irq_mask(uint8_t irq);
 void irq_unmask(uint8_t irq);
 
 void irq_send_eoi(uint8_t irq);
+
+#endif
