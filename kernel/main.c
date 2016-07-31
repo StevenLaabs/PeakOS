@@ -59,8 +59,6 @@ void kinit()
 
 	terminal_init();
 
-	terminal_write("Hobby OS has been loaded...\n");
-
 	terminal_write("Paging enabled with higher half...\n");
 
 	idt_init();
@@ -68,10 +66,7 @@ void kinit()
 	terminal_write("IDT initialized...\n");
 	terminal_write("Testing interrupt handlers...\n");
 
-	/*for(int i = 0; i < 48; i++)
-	{
-		issue_interrupt(i);
-	}*/
+	terminal_write("Welcome to PeakOS! - Keyboard input should be enabled\n");
 
 	while(1) { asm("hlt"); }
 }

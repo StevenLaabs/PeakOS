@@ -3,7 +3,7 @@ PeakOS
 **PeakOS** is a hobby operating system.
 
 ## Screenshots
-![Boot](https://raw.githubusercontent.com/StevenLaabs/PeakOS/master/images/basic_init.png)
+![Boot](https://raw.githubusercontent.com/StevenLaabs/PeakOS/master/images/peakos_keyboard.png)
 
 ## Download
 * [Current](https://github.com/StevenLaabs/PeakOS/archive/master.zip)
