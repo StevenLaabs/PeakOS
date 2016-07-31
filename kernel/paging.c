@@ -1,4 +1,4 @@
-#include "paging.h"
+#include <kernel/paging.h>
 
 void paging_init()
 {

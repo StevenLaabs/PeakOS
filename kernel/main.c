@@ -1,9 +1,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "terminal.h"
-#include "paging.h"
-#include "idt.h"
+#include <kernel/terminal.h>
+#include <kernel/paging.h>
+#include <kernel/idt.h>
 
 void issue_interrupt(unsigned char i)
 {

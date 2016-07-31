@@ -1,6 +1,6 @@
-#include "keyboard.h"
-#include "io.h"
-#include "terminal.h"
+#include <drivers/keyboard.h>
+#include <kernel/io.h>
+#include <kernel/terminal.h>
 
 unsigned char keymap[128] = {
   0, /* no character at start */

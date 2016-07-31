@@ -1,7 +1,7 @@
 #ifndef _PIC_H
 #define _PIC_H
 
-#include "io.h"
+#include <kernel/io.h>
 
 #define PICM_COMMAND 0x20 // new offset for master PIC
 #define PICM_DATA (PICM_COMMAND+1)

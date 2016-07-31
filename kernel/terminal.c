@@ -1,6 +1,6 @@
-#include "terminal.h"
-#include "vga.h"
-#include "io.h"
+#include <kernel/terminal.h>
+#include <kernel/vga.h>
+#include <kernel/io.h>
 
 static size_t cursor_x;
 static size_t cursor_y;

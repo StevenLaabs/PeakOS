@@ -1,6 +1,7 @@
-#include "idt.h"
-#include "terminal.h"
-#include "pic.h"
+#include <kernel/idt.h>
+#include <kernel/terminal.h>
+#include <kernel/pic.h>
+#include <drivers/keyboard.h>
 
 // macro defines a function for the interrupt handler number
 #define NEW_INTERRUPT_HANDLER(i) extern void interrupt_handler_##i(void)

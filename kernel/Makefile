@@ -3,7 +3,7 @@
 HOST ?= i686-elf
 HOSTARCH := $(shell ../target-triplet-to-arch.sh $(HOST))
 
-CFLAGS?=-O2 -g
+CFLAGS?=-O2 -g -Iinclude
 LDFLAGS?=
 LIBS?=
 
@@ -31,7 +31,7 @@ main.o \
 terminal.o \
 paging.o \
 io.o \
-keyboard.o \
+drivers/keyboard.o \
 pic.o \
 idt_asm.o \
 idt.o \

@@ -1,4 +1,4 @@
-#include "pic.h"
+#include <kernel/pic.h>
 
 void pic_map(int offset1, int offset2)
 {
