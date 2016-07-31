@@ -1,6 +1,6 @@
 PeakOS
 ======
-**PeakOS** is a hobby operating system.
+**PeakOS** is a hobby operating system. [Click here to see current plans for the project on Trello.](https://trello.com/b/5HTUZoXM/peakos)
 
 ## Screenshots
 ![Boot](https://raw.githubusercontent.com/StevenLaabs/PeakOS/master/images/peakos_keyboard.png)
