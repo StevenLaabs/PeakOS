@@ -43,17 +43,13 @@ void terminal_init()
 void terminal_clear()
 {
 	for(int i = 0; i < (VGA_SCREEN_WIDTH * VGA_SCREEN_HEIGHT); i++)
-	{
 		VGA_PTR[i] = (color << 8);
-	}
 }
 
 void terminal_scroll()
 {
-	for(int y = 0; y < VGA_SCREEN_HEIGHT; y++)
-	{
-		for(int x = 0; x < VGA_SCREEN_WIDTH; x++)
-		{
+	for(int y = 0; y < VGA_SCREEN_HEIGHT; y++) {
+		for(int x = 0; x < VGA_SCREEN_WIDTH; x++) {
 			VGA_PTR[y * VGA_SCREEN_WIDTH + x] = VGA_PTR[(y+1) * VGA_SCREEN_WIDTH + x];
 		}
 	}
@@ -62,8 +58,7 @@ void terminal_scroll()
 void terminal_write(char * str)
 {
 	int index = 0;
-	while(str[index] != '\0')
-	{
+	while(str[index] != '\0') {
 		terminal_putchar(str[index++]);
 	}
 }
@@ -83,8 +78,7 @@ void terminal_writeint(int val, int base)
 
 void terminal_putchar(char c)
 {
-	switch(c)
-	{
+	switch(c) {
 		case '\n':
 			cursor_x = 0;
 			cursor_y++;
@@ -103,13 +97,12 @@ void terminal_putchar(char c)
       if(cursor_x == 0 && cursor_y == 0)
         break;
 
-      if(cursor_x == 0)
-      {
+      if(cursor_x == 0) {
         cursor_y -= 1;
         cursor_x = VGA_SCREEN_WIDTH;
-      }
-      else
+      } else {
         cursor_x -= 1;
+      }
 
       VGA_PTR[cursor_y * VGA_SCREEN_WIDTH + cursor_x] = vga_get_entry(' ', color);
       break;
@@ -117,16 +110,14 @@ void terminal_putchar(char c)
 		default:
 			VGA_PTR[cursor_y * VGA_SCREEN_WIDTH + cursor_x] = vga_get_entry(c, color);
 			cursor_x++;
-			if(cursor_x > VGA_SCREEN_WIDTH)
-			{
+			if(cursor_x > VGA_SCREEN_WIDTH) {
 				cursor_x = 0;
 				cursor_y++;
 			}
 			break;
 	}
 
-	if(cursor_y > VGA_SCREEN_HEIGHT)
-	{
+	if(cursor_y > VGA_SCREEN_HEIGHT) {
 		terminal_scroll();
 		cursor_y = VGA_SCREEN_HEIGHT;
 	}

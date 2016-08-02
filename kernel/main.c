@@ -7,8 +7,7 @@
 
 void issue_interrupt(unsigned char i)
 {
-	switch(i)
-	{
+	switch(i) {
 		case 0: __asm__("int 0\n"); break;
 		case 1: __asm__("int 1\n"); break;
 		case 2: __asm__("int 2\n"); break;

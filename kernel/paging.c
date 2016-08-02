@@ -11,22 +11,19 @@ void paging_init()
 	uint32_t size_of_tables = num_page_tables * NUM_ENTRIES;
 
 	// initialize page table entries
-	for(unsigned int i = 0; i < size_of_tables; i++)
-	{
+	for(unsigned int i = 0; i < size_of_tables; i++) {
 		physical_page_table_1[i] = (i * 4096) | flags;
 	}
 
 	// identity map the kernel addresses in the page table
 	uint32_t start_entry_index = (KERNEL_PAGE_INDEX * 1024);
-	for(unsigned int i = 0; i < size_of_tables; i++)
-	{
+	for(unsigned int i = 0; i < size_of_tables; i++) {
 		physical_page_table_1[i + start_entry_index] = (i * 4096) | flags;
 	}
 
 	// map the page directory to the tables
 	start_entry_index = (uint32_t)physical_page_table_1;
-	for(unsigned int i = 0; i < NUM_ENTRIES; i++)
-	{
+	for(unsigned int i = 0; i < NUM_ENTRIES; i++) {
 		physical_page_directory[i] = (start_entry_index + (i * 4096)) | flags;
 	}
 
@@ -54,4 +51,3 @@ void paging_init()
 		"nop\n"
 	);
 }
-

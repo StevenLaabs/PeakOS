@@ -2,7 +2,11 @@
 #include <kernel/io.h>
 #include <kernel/terminal.h>
 
-unsigned char keymap[128] = {
+#define KEYBOARD_DATA_PORT 0x60
+#define KEYBOARD_STATUS_PORT 0x64
+#define KEYBOARD_CMD_PORT 0x64
+
+static unsigned char keymap[128] = {
   0, /* no character at start */
   27,
   '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '\b',
@@ -45,13 +49,9 @@ void keyboard_handler()
 {
   uint8_t scancode = read_scancode();
 
-  if(scancode & 0x80)
-  {
+  if(scancode & 0x80) {
     // key released
-  }
-
-  else
-  {
+  } else {
     terminal_putchar(keymap[scancode]);
   }
 }

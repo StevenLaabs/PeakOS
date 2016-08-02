@@ -66,22 +66,15 @@ NEW_INTERRUPT_HANDLER(47);
 
 void interrupt_handler(int int_num)
 {
-	if(int_num == 32)
-	{
+	if(int_num == 32) {
 		// this is the timer
-	}
-	else if(int_num == 33)
-	{
+	} else if(int_num == 33) {
 		keyboard_handler();
 	}
 
-	if(int_num >= 32 && int_num < 48)
-	{
+	if(int_num >= 32 && int_num < 48) {
 		irq_send_eoi(int_num - 32);
-	}
-
-	else
-	{
+	} else {
 		terminal_write("Interrupt: ");
 		terminal_writeint(int_num, 10);
 		terminal_putchar('\n');

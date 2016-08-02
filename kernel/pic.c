@@ -38,12 +38,9 @@ void irq_mask(uint8_t irq)
 	uint16_t port;
 	uint8_t value;
 
-	if(irq < 8)
-	{
+	if(irq < 8) {
 		port = PICM_DATA;
-	}
-	else
-	{
+	} else {
 		// IRQs 8-15 are on the slave PIC
 		port = PICS_DATA;
 		irq -= 8;
@@ -58,12 +55,9 @@ void irq_unmask(uint8_t irq)
 	uint16_t port;
 	uint8_t value;
 
-	if(irq < 8)
-	{
+	if(irq < 8) {
 		port = PICM_DATA;
-	}
-	else
-	{
+	} else {
 		// IRQs 8-15 are on slave PIC
 		port = PICS_DATA;
 		irq -= 8;
@@ -77,11 +71,8 @@ void irq_unmask(uint8_t irq)
 
 void irq_send_eoi(uint8_t irq)
 {
-	if(irq >= 8)
-	{
-		// slave PIC IRQ
+	if(irq >= 8) {
 		outb(PICS_COMMAND, PIC_EOI);
-	}
 
 	outb(PICM_COMMAND, PIC_EOI); // end of interrupt
 }
