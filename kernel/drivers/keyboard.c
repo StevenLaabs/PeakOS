@@ -6,6 +6,9 @@
 #define KEYBOARD_STATUS_PORT 0x64
 #define KEYBOARD_CMD_PORT 0x64
 
+#define LEFT_SHIFT_CODE 0x2A
+#define RIGHT_SHIFT_CODE 0x36
+
 static unsigned char keymap[128] = {
   0, /* no character at start */
   27,
@@ -40,6 +43,43 @@ static unsigned char keymap[128] = {
   0,	/* Rest are undefined */
 };
 
+
+static unsigned char keymap_shift[128] = {
+  0, /* no character at start */
+  27,
+  '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '\b',
+  '\t', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}',
+  '\n', 0, /* left control */
+  'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ':', '"',
+  '~', 0, '\\', /* left shift */
+  'Z', 'X', 'C', 'V', 'B', 'N', 'M', '<', '>', '?',
+  0, /* right shift */
+  '*', 0, /* left alt */
+  ' ', 0, /* caps lock */
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* f1-f10 */
+  0, /* num lock */
+  0, /* scroll lock */
+  0,	/* Home key */
+  0,	/* Up Arrow */
+  0,	/* Page Up */
+'_',
+  0,	/* Left Arrow */
+  0,
+  0,	/* Right Arrow */
+'=',
+  0,	/* 79 - End key*/
+  0,	/* Down Arrow */
+  0,	/* Page Down */
+  0,	/* Insert Key */
+  0,	/* Delete Key */
+  0,   0,   0,
+  0,	/* F11 Key */
+  0,	/* F12 Key */
+  0,	/* Rest are undefined */
+};
+
+static unsigned char keyactive[128] = { 0 };
+
 static uint8_t read_scancode()
 {
   return inb(KEYBOARD_DATA_PORT);
@@ -51,7 +91,15 @@ void keyboard_handler()
 
   if(scancode & 0x80) {
     // key released
+	keyactive[scancode & 0x7F] = 0;
   } else {
-    terminal_putchar(keymap[scancode]);
+	keyactive[scancode] = 1;
+	if(!keymap[scancode])
+		return;
+	
+	if(keyactive[LEFT_SHIFT_CODE] || keyactive[RIGHT_SHIFT_CODE])
+		terminal_putchar(keymap_shift[scancode]);
+	else
+    	terminal_putchar(keymap[scancode]);
   }
 }
