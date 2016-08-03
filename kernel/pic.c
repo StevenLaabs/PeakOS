@@ -71,7 +71,7 @@ void irq_unmask(uint8_t irq)
 
 void irq_send_eoi(uint8_t irq)
 {
-	if(irq >= 8) {
+	if(irq >= 8)
 		outb(PICS_COMMAND, PIC_EOI);
 
 	outb(PICM_COMMAND, PIC_EOI); // end of interrupt
