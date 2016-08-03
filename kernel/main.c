@@ -57,14 +57,11 @@ void kinit()
 	paging_init();
 
 	terminal_init();
-
 	terminal_write("Paging enabled with higher half...\n");
-
+	
 	idt_init();
-
 	terminal_write("IDT initialized...\n");
-	terminal_write("Testing interrupt handlers...\n");
-
+	
 	terminal_write("Welcome to PeakOS! - Keyboard input should be enabled\n");
 
 	while(1) { asm("hlt"); }

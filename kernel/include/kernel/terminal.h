@@ -6,7 +6,7 @@
 
 #define CURSOR_CMD_PORT 0x3D4
 #define CURSOR_DATA_PORT 0x3D5
-#define CURSOR_LOW_BYE 0x0F
+#define CURSOR_LOW_BYTE 0x0F
 #define CURSOR_HIGH_BYTE 0x0E
 
 void terminal_init();

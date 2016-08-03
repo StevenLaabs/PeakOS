@@ -9,20 +9,26 @@ static uint8_t color;
 
 static void enable_cursor() {
     outb(CURSOR_CMD_PORT, 0x0A);
+	char scan_start = inb(CURSOR_DATA_PORT) & 0x1F; // scanline start
 
-    char scan_start = inb(CURSOR_DATA_PORT) & 0x1F; // scanline start
+	outb(CURSOR_CMD_PORT, 0x0B);
+	char scan_end = 0xF;
+	char scan_scew = inb(CURSOR_DATA_PORT) & 0x60;
 
     outb(CURSOR_CMD_PORT, 0x0A);
-    outb(CURSOR_DATA_PORT, scan_start | 0x20); // set cursor enabled
+    outb(CURSOR_DATA_PORT, scan_start & (~0x20)); // set cursor enabled
+
+	outb(CURSOR_CMD_PORT, 0x0B);
+	outb(CURSOR_DATA_PORT, scan_end | scan_scew);
 }
 
 static void update_cursor()
 {
-	uint8_t position = (uint8_t)((cursor_y * 80) + cursor_x);
-	outb(CURSOR_CMD_PORT, CURSOR_HIGH_BYTE);
+	unsigned short position = (unsigned short)((cursor_y * 80) + cursor_x);
+	outb(CURSOR_CMD_PORT, CURSOR_LOW_BYTE);
 	outb(CURSOR_DATA_PORT, (position & 0xFF));
 
-	outb(CURSOR_CMD_PORT, CURSOR_LOW_BYE);
+	outb(CURSOR_CMD_PORT, CURSOR_HIGH_BYTE);
 	outb(CURSOR_DATA_PORT, ((position >> 8) & 0xFF));
 }
 
