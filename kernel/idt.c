@@ -210,7 +210,6 @@ void idt_init()
 
 	// unmask the timer and keyboard IRQs so they can be used
 	irq_unmask(IRQ_TIMER);
-	irq_unmask(IRQ_KEYBOARD);
 
 	// configure PIT to be slow rate generator
 	outb(PIT_CMD_PORT, 0x34);

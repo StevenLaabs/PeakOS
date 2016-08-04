@@ -4,6 +4,7 @@
 #include <kernel/terminal.h>
 #include <kernel/paging.h>
 #include <kernel/idt.h>
+#include <drivers/keyboard.h>
 
 void issue_interrupt(unsigned char i)
 {
@@ -62,9 +63,9 @@ void kinit()
 	idt_init();
 	terminal_write("IDT initialized...\n");
 	
-	terminal_write("Welcome to PeakOS! - Keyboard input should be enabled\n");
+	keyboard_init();
 
-	issue_interrupt(8);
+	terminal_write("Welcome to PeakOS! - Keyboard input should be enabled\n");
 
 	while(1) { asm("hlt"); }
 }

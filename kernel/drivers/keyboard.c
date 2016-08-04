@@ -1,6 +1,7 @@
 #include <drivers/keyboard.h>
 #include <kernel/io.h>
 #include <kernel/terminal.h>
+#include <kernel/pic.h>
 
 #define KEYBOARD_DATA_PORT 0x60
 #define KEYBOARD_STATUS_PORT 0x64
@@ -83,6 +84,11 @@ static unsigned char keyactive[128] = { 0 };
 static uint8_t read_scancode()
 {
   return inb(KEYBOARD_DATA_PORT);
+}
+
+void keyboard_init()
+{
+	irq_unmask(IRQ_KEYBOARD);
 }
 
 void keyboard_handler()
