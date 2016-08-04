@@ -6,13 +6,28 @@ EXTERN interrupt_handler
 GLOBAL interrupt_handler_%1
 
 interrupt_handler_%1:
+	push dword %1
 	pushad
 
-	push dword %1
+	mov ax, ds
+	push eax   ; push the data segment for interrupt data in the handler
+
+	mov eax, %1
+	cmp eax, 8
+
+	jne .skip
+
+	xchg bx, bx
+
+	.skip:
+
 	call interrupt_handler
 	add esp, 4
 
+	pop eax
+
 	popad
+
 	iret
 %endmacro
 

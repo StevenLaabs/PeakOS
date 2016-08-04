@@ -64,20 +64,60 @@ NEW_INTERRUPT_HANDLER(45);
 NEW_INTERRUPT_HANDLER(46);
 NEW_INTERRUPT_HANDLER(47);
 
-void interrupt_handler(int int_num)
+void interrupt_handler(struct interrupt_data data)
 {
-	if(int_num == 32) {
+	if(data.int_num == 32) {
 		// this is the timer
-	} else if(int_num == 33) {
+	} else if(data.int_num == 33) {
 		keyboard_handler();
 	}
 
-	if(int_num >= 32 && int_num < 48) {
-		irq_send_eoi(int_num - 32);
-	} else {
+	if(data.int_num >= 32 && data.int_num < 48) {
+		irq_send_eoi(data.int_num - 32);
+	} else if(data.int_num < 32) {
 		terminal_write("Interrupt: ");
-		terminal_writeint(int_num, 10);
+		terminal_writeint(data.int_num, 10);
+		terminal_write(" Err #: ");
+		terminal_writeint(data.error_code, 10);
 		terminal_putchar('\n');
+
+		terminal_write("EAX: ");
+		terminal_writeint(data.eax, 16);
+		terminal_write(" EBX: ");
+		terminal_writeint(data.ebx, 16);
+		terminal_write(" ECX: ");
+		terminal_writeint(data.ecx, 16);
+		terminal_write(" EDX: ");
+		terminal_writeint(data.edx, 16);
+
+		terminal_write("\nESP: ");
+		terminal_writeint(data.esp, 16);
+		terminal_write(" EBP: ");
+		terminal_writeint(data.ebp, 16);
+		terminal_write(" ESI: ");
+		terminal_writeint(data.esi, 16);
+		terminal_write(" EDI: ");
+		terminal_writeint(data.edi, 16);
+
+		terminal_write("\nEIP: ");
+		terminal_writeint(data.eip, 16);
+		terminal_write(" CS: ");
+		terminal_writeint(data.cs, 16);
+		terminal_write(" FLAGS: ");
+		terminal_writeint(data.eflags, 16);
+		terminal_write(" UESP: ");
+		terminal_writeint(data.useresp, 16);
+		terminal_write(" SS: ");
+		terminal_writeint(data.ss, 16);
+
+		terminal_write("\nDS: ");
+		terminal_writeint(data.ds, 16);
+		terminal_putchar('\n');
+
+		// TODO: kernel abort/panic method in libk
+		asm("cli");
+		terminal_write("\nPanic! Aborting...\n");
+		while(1) {}
 	}
 }
 

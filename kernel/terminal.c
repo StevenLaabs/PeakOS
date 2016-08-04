@@ -71,15 +71,24 @@ void terminal_write(char * str)
 
 void terminal_writeint(int val, int base)
 {
+	int start_val = val;
 	static char buf[32] = {0};
 
 	int i = 30;
 
 	for(; val && i ; --i, val /= base)
 
-	buf[i] = "0123456789abcdef"[val % base];
+	buf[i] = "0123456789ABCDEF"[val % base];
 
-	terminal_write(&buf[i+1]);
+	if(base == 16)
+		terminal_write("0x");
+	else if(base == 2)
+		terminal_write("0b");
+
+	if(start_val == 0)
+		terminal_write("0");
+	else
+		terminal_write(&buf[i+1]);
 }
 
 void terminal_putchar(char c)

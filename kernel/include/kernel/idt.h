@@ -28,6 +28,14 @@ struct idt_pointer_t
 	struct idt_entry_t* base;
 } __attribute__((packed));
 
+// info pushed by the interrupt
+struct interrupt_data {
+	uint32_t ds;
+	uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax; // reverse order pushad pushes the regs in
+	uint32_t int_num, error_code;                    // pushed at start of handler
+	uint32_t eip, cs, eflags, useresp, ss;
+};
+
 struct idt_entry_t* idt; // 256 interrupt entries in the IDT
 struct idt_pointer_t* idt_ptr;   // pointer info for the IDT
 
