@@ -17,8 +17,8 @@
 
 void de9_set_baud(uint16_t com, uint16_t divisor)
 {
-	outb(com + INT_REG, DLAB_ENABLE); // set the DLAB bit to configure baud rate
-	outb(com + DIVISOR_LOW, divisor & 0x00FF); // set lowest 8 bits of divisor
+	outb(com + INT_REG, DLAB_ENABLE);                  // set the DLAB bit to configure baud rate
+	outb(com + DIVISOR_LOW, divisor & 0x00FF);         // set lowest 8 bits of divisor
 	outb(com + DIVISOR_HIGH, (divisor >> 8) & 0x00FF); // set highest 8 bits of divisor
 }
 
@@ -40,6 +40,7 @@ void de9_config_modem(uint16_t com)
 	outb(com + MODEM_CTRL_REG, 0x0B);
 }
 
+// Returned the state of the received bit to determine if the serial port has received data
 static int serial_received(uint16_t com)
 {
 	return inb(com + LINE_STATUS_REG) & 1;
@@ -52,6 +53,7 @@ char read_serial(uint16_t com)
 	return inb(com);
 }
 
+// Returns whether the transmission bit is set to determine if there is space to transmit
 static int is_transmit_empty(uint16_t com)
 {
 	return inb(com + LINE_STATUS_REG) & 0x20;

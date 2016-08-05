@@ -8,6 +8,9 @@
 
 #define IDT_SET_GATE(index) idt_set_gate(index, (uint32_t)&interrupt_handler_##index, 0x08, 0x8E);
 
+static struct idt_entry_t* idt; // 256 interrupt entries in the IDT
+static struct idt_pointer_t* idt_ptr;   // pointer info for the IDT
+
 extern uint32_t idt_pointer;
 extern uint32_t idt_contents;
 
@@ -64,6 +67,10 @@ NEW_INTERRUPT_HANDLER(45);
 NEW_INTERRUPT_HANDLER(46);
 NEW_INTERRUPT_HANDLER(47);
 
+/*
+ * General interrupt handler that takes in the interrupt number and sends it
+ * to the appropriate handler
+ */
 void interrupt_handler(struct interrupt_data data)
 {
 	if(data.int_num == 32) {
@@ -207,14 +214,6 @@ void idt_init()
 	);
 
 	pic_map(0x20, 0x28);
-
-	// unmask the timer and keyboard IRQs so they can be used
-	irq_unmask(IRQ_TIMER);
-
-	// configure PIT to be slow rate generator
-	outb(PIT_CMD_PORT, 0x34);
-	outb(PIT_CH0_PORT, 0xFF);
-	outb(PIT_CH0_PORT, 0xFF);
 
 	__asm__
 	(

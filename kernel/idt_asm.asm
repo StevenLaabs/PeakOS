@@ -5,6 +5,7 @@ EXTERN interrupt_handler
 %macro interrupt_handler_macro 1
 GLOBAL interrupt_handler_%1
 
+; Common interrupt handler which will call the C handler
 interrupt_handler_%1:
 	push dword %1 ; push interrupt number for argument
 	pushad

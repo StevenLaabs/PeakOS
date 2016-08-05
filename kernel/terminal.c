@@ -2,11 +2,20 @@
 #include <kernel/vga.h>
 #include <kernel/io.h>
 
+#define CURSOR_CMD_PORT 0x3D4
+#define CURSOR_DATA_PORT 0x3D5
+#define CURSOR_LOW_BYTE 0x0F
+#define CURSOR_HIGH_BYTE 0x0E
+
 static size_t cursor_x;
 static size_t cursor_y;
 
 static uint8_t color;
 
+/*
+ * Send cursor command port signal to enable the cursor with a scanline
+ * the starts at the top and ends at the bottom of a character (full size)
+ */
 static void enable_cursor() {
     outb(CURSOR_CMD_PORT, 0x0A);
 	char scan_start = inb(CURSOR_DATA_PORT) & 0x1F; // scanline start
@@ -22,6 +31,10 @@ static void enable_cursor() {
 	outb(CURSOR_DATA_PORT, scan_end | scan_scew);
 }
 
+/*
+ * Update the position of the cursor by outputting the cursor position
+ * high and low bytes to the cursor data port
+ */
 static void update_cursor()
 {
 	unsigned short position = (unsigned short)((cursor_y * 80) + cursor_x);

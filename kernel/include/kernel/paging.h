@@ -3,14 +3,11 @@
 
 #include <stdint.h>
 
-#define NUM_ENTRIES 1024
-#define NUM_TABLES 1024
-#define VIRTUAL_BASE_ADDR 0xC0000000
-#define KERNEL_PAGE_INDEX (VIRTUAL_BASE_ADDR >> 22)
-
-extern uint32_t page_tables[NUM_ENTRIES * NUM_TABLES];
-extern uint32_t page_directory[NUM_ENTRIES];
-
+/*
+ * Configures initial page tables and page directory by identity mapping
+ * the kernel addresses in the page table and loading the directory into the cr3 register
+ * then performing a long jump to the higher half address
+ */
 void paging_init();
 
 #endif

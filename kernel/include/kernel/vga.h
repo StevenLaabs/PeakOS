@@ -3,10 +3,12 @@
 
 #include <stdint.h>
 
+// Starting point of the VGA text mode buffer address
 #define VGA_BUFFER 0xB8000
 #define VGA_SCREEN_WIDTH 80
 #define VGA_SCREEN_HEIGHT 25
 
+// Colors for the VGA text mode have these corresponding values
 #define VGA_BLACK 0
 #define VGA_BLUE 1
 #define VGA_GREEN 2
@@ -24,13 +26,22 @@
 #define VGA_LIGHT_BROWN 14
 #define VGA_WHITE 15
 
+// Pointer to the start of the VGA text mode buffer
 static uint16_t* const VGA_PTR = (uint16_t*) VGA_BUFFER;
 
+/*
+ * Makes a byte of the foreground and background colors where
+ * the background is the first 4 bits and the foreground is the last 4
+ */
 static inline uint8_t vga_get_color(uint8_t text, uint8_t background)
 {
 	return (background << 4) | text;
 }
 
+/*
+ * Creates a 2 byte entry that can be written to the VGA buffer with
+ * the VGA color in the first byte and the ascii character in the second byte
+ */
 static inline uint16_t vga_get_entry(char c, uint8_t color)
 {
 	uint16_t entry_color = color;
