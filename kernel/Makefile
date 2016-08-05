@@ -32,6 +32,7 @@ terminal.o \
 paging.o \
 io.o \
 drivers/keyboard.o \
+drivers/de9.o \
 pic.o \
 idt_asm.o \
 idt.o \

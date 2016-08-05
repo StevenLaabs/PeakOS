@@ -5,6 +5,7 @@
 #include <kernel/paging.h>
 #include <kernel/idt.h>
 #include <drivers/keyboard.h>
+#include <drivers/de9.h>
 
 void issue_interrupt(unsigned char i)
 {
