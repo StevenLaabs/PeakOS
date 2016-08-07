@@ -1,7 +1,7 @@
 #include <kernel/idt.h>
-#include <kernel/terminal.h>
 #include <kernel/pic.h>
 #include <drivers/keyboard.h>
+#include <stdlib.h>
 
 // macro defines a function for the interrupt handler number
 #define NEW_INTERRUPT_HANDLER(i) extern void interrupt_handler_##i(void)
@@ -82,6 +82,9 @@ void interrupt_handler(struct interrupt_data data)
 	if(data.int_num >= 32 && data.int_num < 48) {
 		irq_send_eoi(data.int_num - 32);
 	} else if(data.int_num < 32) {
+
+		
+
 		terminal_write("Interrupt: ");
 		terminal_writeint(data.int_num, 10);
 		terminal_write(" Err #: ");
@@ -121,10 +124,7 @@ void interrupt_handler(struct interrupt_data data)
 		terminal_writeint(data.ds, 16);
 		terminal_putchar('\n');
 
-		// TODO: kernel abort/panic method in libk
-		asm("cli");
-		terminal_write("\nPanic! Aborting...\n");
-		while(1) {}
+		abort();
 	}
 }
 

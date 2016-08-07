@@ -68,5 +68,9 @@ void kinit()
 
 	terminal_write("Welcome to PeakOS! - Keyboard input should be enabled\n");
 
+	printf("Testing printf function\n");
+
+	//issue_interrupt(0x8);
+
 	while(1) { asm("hlt"); }
 }

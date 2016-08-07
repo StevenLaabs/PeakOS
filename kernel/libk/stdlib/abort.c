@@ -3,6 +3,7 @@
 
 void abort(void)
 {
-	printf("Kernel panic: aborting...\n");
+	asm("cli");
+	printf("Kernel panic! Aborting...\n");
 	while(1) {}
 }
