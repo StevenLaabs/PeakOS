@@ -1,9 +1,10 @@
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 
-#include <kernel/terminal.h>
 #include <kernel/paging.h>
 #include <kernel/idt.h>
+#include <kernel/terminal.h>
 #include <drivers/keyboard.h>
 #include <drivers/de9.h>
 
@@ -68,7 +69,7 @@ void kinit()
 
 	terminal_write("Welcome to PeakOS! - Keyboard input should be enabled\n");
 
-	printf("Testing printf function\n");
+	//printf("Testing printf function\n");
 
 	//issue_interrupt(0x8);
 

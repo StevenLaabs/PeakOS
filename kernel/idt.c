@@ -2,6 +2,7 @@
 #include <kernel/pic.h>
 #include <drivers/keyboard.h>
 #include <stdlib.h>
+#include <kernel/terminal.h>
 
 // macro defines a function for the interrupt handler number
 #define NEW_INTERRUPT_HANDLER(i) extern void interrupt_handler_##i(void)
@@ -133,10 +134,10 @@ void idt_set_gate(uint8_t index, uint32_t isr_adr, uint16_t selector, uint8_t fl
 	idt[index].offset1 = (isr_adr & 0xFFFF);
 	idt[index].offset2 = ((isr_adr >> 16) & 0xFFFF);
 	idt[index].selector = selector;
-	idt[index].gate_type = 0xE;
-	idt[index].storage_segment = 0x0;
-	idt[index].dpl = 0x0;
-	idt[index].present = 0x1;
+	idt[index].gate_type = flags & 0xF;
+	idt[index].storage_segment = (flags >> 4) & 0x1;
+	idt[index].dpl = (flags >> 5) & 0x3;
+	idt[index].present = (flags >> 7) & 0x1;
 	idt[index].zero = 0;
 }
 
