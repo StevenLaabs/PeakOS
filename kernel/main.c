@@ -69,15 +69,8 @@ void kinit()
 	keyboard_init();
 
 	terminal_write("Welcome to PeakOS! - Keyboard input should be enabled\n");
-
-
-	//issue_interrupt(0x8);
 	
 	de9_init(COM1);
-
-	printf("This is a test newline\n");
-	printf("This is a %s for printf\n", "test string");
-	printf("This is a %d ", 8);
 
 	while(1) { asm("hlt"); }
 }

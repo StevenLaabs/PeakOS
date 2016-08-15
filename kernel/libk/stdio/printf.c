@@ -21,7 +21,6 @@ int printf(const char* restrict format, ...)
 
 	size_t amount;
 	bool bad_specifier = false;
-	int len;
  
 	while ( *format != '\0' )
 	{
@@ -65,7 +64,7 @@ int printf(const char* restrict format, ...)
 			case 'i': {
 				format++;
 				int i = va_arg(args, int);
-				char* str;
+				char str[20];
 				itoa(i, str, 10);
 				int len = strlen(str);
 				print(str, len);
