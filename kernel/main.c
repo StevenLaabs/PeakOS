@@ -7,7 +7,6 @@
 #include <kernel/terminal.h>
 #include <drivers/keyboard.h>
 #include <drivers/de9.h>
-#include <kdebug.h>
 
 void issue_interrupt(unsigned char i)
 {
@@ -49,7 +48,7 @@ void issue_interrupt(unsigned char i)
 		case 45: __asm__("int 45\n"); break;
 		case 46: __asm__("int 46\n"); break;
 		case 47: __asm__("int 47\n"); break;
-		default: terminal_write("Invalid interrupt number\n"); break;
+		default: printf("Invalid interrupt number: %i\n", i); break;
 	}
 }
 
@@ -61,14 +60,14 @@ void kinit()
 	paging_init();
 
 	terminal_init();
-	terminal_write("Paging enabled with higher half...\n");
+	printf("Paging enabled with higher half...\n");
 	
 	idt_init();
-	terminal_write("IDT initialized...\n");
+	printf("IDT initialized...\n");
 	
 	keyboard_init();
 
-	terminal_write("Welcome to PeakOS! - Keyboard input should be enabled\n");
+	printf("Welcome to PeakOS! - Keyboard input should be enabled\n");
 	
 	de9_init(COM1);
 

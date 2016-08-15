@@ -2,7 +2,7 @@
 #include <kernel/pic.h>
 #include <drivers/keyboard.h>
 #include <stdlib.h>
-#include <kernel/terminal.h>
+#include <stdio.h>
 
 // macro defines a function for the interrupt handler number
 #define NEW_INTERRUPT_HANDLER(i) extern void interrupt_handler_##i(void)
@@ -85,45 +85,11 @@ void interrupt_handler(struct interrupt_data data)
 	} else if(data.int_num < 32) {
 
 		
-
-		terminal_write("Interrupt: ");
-		terminal_writeint(data.int_num, 10);
-		terminal_write(" Err #: ");
-		terminal_writeint(data.error_code, 10);
-		terminal_putchar('\n');
-
-		terminal_write("EAX: ");
-		terminal_writeint(data.eax, 16);
-		terminal_write(" EBX: ");
-		terminal_writeint(data.ebx, 16);
-		terminal_write(" ECX: ");
-		terminal_writeint(data.ecx, 16);
-		terminal_write(" EDX: ");
-		terminal_writeint(data.edx, 16);
-
-		terminal_write("\nESP: ");
-		terminal_writeint(data.esp, 16);
-		terminal_write(" EBP: ");
-		terminal_writeint(data.ebp, 16);
-		terminal_write(" ESI: ");
-		terminal_writeint(data.esi, 16);
-		terminal_write(" EDI: ");
-		terminal_writeint(data.edi, 16);
-
-		terminal_write("\nEIP: ");
-		terminal_writeint(data.eip, 16);
-		terminal_write(" CS: ");
-		terminal_writeint(data.cs, 16);
-		terminal_write(" FLAGS: ");
-		terminal_writeint(data.eflags, 16);
-		terminal_write(" UESP: ");
-		terminal_writeint(data.useresp, 16);
-		terminal_write(" SS: ");
-		terminal_writeint(data.ss, 16);
-
-		terminal_write("\nDS: ");
-		terminal_writeint(data.ds, 16);
-		terminal_putchar('\n');
+		printf("Interrupt: %i\tErr #: %i\n", (int)data.int_num, (int)data.error_code);
+		printf("EAX: %x\tEBX: %x\tECX: %x\tEDX: %x\n", (unsigned int)data.eax, (unsigned int)data.ebx, (unsigned int)data.ecx, (unsigned int)data.edx);
+		printf("ESP: %x\tEBP: %x\tESI: %x\tEDI: %x\n", (unsigned int)data.esp, (unsigned int)data.ebp, (unsigned int)data.esi, (unsigned int)data.edi);
+		printf("EIP: %x\tCS: %x\tFLAGS: %x\tUESP: %x\n", (unsigned int)data.eip, (unsigned int)data.cs, (unsigned int)data.eflags, (unsigned int)data.useresp);
+		printf("SS: %x\tDS: %x\n", (unsigned int)data.ss, (unsigned int)data.ds);
 
 		abort();
 	}
