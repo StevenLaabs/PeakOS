@@ -3,8 +3,6 @@
 #include <stdarg.h>
 #include <stdbool.h>
 #include <string.h>
-#include <kernel/terminal.h>
-#include <kdebug.h>
 
 static void print(const char* data, size_t data_length)
 {
