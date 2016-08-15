@@ -1,8 +1,11 @@
-/*#include <stdbool.h>
-#include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <stdbool.h>
 #include <string.h>
- 
+#include <kernel/terminal.h>
+#include <kdebug.h>
+
 static void print(const char* data, size_t data_length)
 {
 	for ( size_t i = 0; i < data_length; i++ )
@@ -11,16 +14,18 @@ static void print(const char* data, size_t data_length)
  
 int printf(const char* restrict format, ...)
 {
-	va_list parameters;
-	va_start(parameters, format);
- 
-	int written = 0;
+	va_list args;
+	va_start(args, format);
+
+	unsigned int written = 0;
+
 	size_t amount;
-	bool rejected_bad_specifier = false;
+	bool bad_specifier = false;
+	int len;
  
 	while ( *format != '\0' )
 	{
-		if ( *format != '%' )
+		if (bad_specifier || *format != '%' )
 		{
 		print_c:
 			amount = 1;
@@ -37,82 +42,55 @@ int printf(const char* restrict format, ...)
 		if ( *(++format) == '%' )
 			goto print_c;
  
-		if ( rejected_bad_specifier )
+		switch(*format)
 		{
-		incomprehensible_conversion:
-			rejected_bad_specifier = true;
-			format = format_begun_at;
-			goto print_c;
-		}
- 
-		if ( *format == 'c' )
-		{
-			format++;
-			char c = (char) va_arg(parameters, int);
-			print(&c, sizeof(c));
-		}
-		else if ( *format == 's' )
-		{
-			format++;
-			const char* s = va_arg(parameters, const char*);
-			print(s, strlen(s));
-		}
-		else
-		{
-			goto incomprehensible_conversion;
-		}
-	}
- 
-	va_end(parameters);
- 
-	return written;
-}*/
-
-#include <stdio.h>
-#include <stdarg.h>
-#include <kernel/terminal.h>
-
-int printf(const char* restrict format, ...)
-{
-	va_list args;
-	va_start(args, format);
-
-	const char * parse;
-	unsigned int written = 0;
-	int i;
-	char *s;
-
-	for(parse = format; *parse != '\0'; parse++)
-	{
-		if(*parse != '%')
-		{
-			asm("xchg bx, bx");
-			putchar((int)(*parse));
-			asm("xchg bx, bx");
-			written++;
-			continue;
-		}
-
-		parse++;
-
-		switch(*parse)
-		{
-			case 'c':
-				i = va_arg(args, int);
-				putchar(i);
+			case 'c': {
+				format++;
+				int c = va_arg(args, int);
+				putchar(c);
+				written++;
 				break;
+			}
 
-			case 's':
-				s = va_arg(args, char*);
-				puts(s);
+			case 's': {
+				format++;
+				const char* s = va_arg(args, const char*);
+				int len = strlen(s);
+				print(s, len);
+				written += len;
 				break;
+			}
+
+			case 'd':
+			case 'i': {
+				format++;
+				int i = va_arg(args, int);
+				char* str;
+				itoa(i, str, 10);
+				int len = strlen(str);
+				print(str, len);
+				written += len;
+				break;
+			}
+
+			case 'x': {
+				format++;
+				int x = va_arg(args, int);
+				char* str;
+				itoa(x, str, 16);
+				int len = strlen(str);
+				print(str, len);
+				written += len;
+				break;
+			}
 
 			default:
-				break;// err
+				bad_specifier = true;
+				format = format_begun_at;
 		}
 	}
-
+ 
 	va_end(args);
-
+ 
 	return written;
 }

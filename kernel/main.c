@@ -7,6 +7,7 @@
 #include <kernel/terminal.h>
 #include <drivers/keyboard.h>
 #include <drivers/de9.h>
+#include <kdebug.h>
 
 void issue_interrupt(unsigned char i)
 {
@@ -69,9 +70,14 @@ void kinit()
 
 	terminal_write("Welcome to PeakOS! - Keyboard input should be enabled\n");
 
-	//printf("Testing printf function\n");
 
 	//issue_interrupt(0x8);
+	
+	de9_init(COM1);
+
+	printf("This is a test newline\n");
+	printf("This is a %s for printf\n", "test string");
+	printf("This is a %d ", 8);
 
 	while(1) { asm("hlt"); }
 }

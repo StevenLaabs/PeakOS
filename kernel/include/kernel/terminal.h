@@ -24,7 +24,7 @@ void terminal_scroll();
 /*
  * Writes a character string to the terminal
  */
-void terminal_write(char * str);
+void terminal_write(const char* str);
 
 /*
  * Puts a single character in the terminal at the cursor position which is

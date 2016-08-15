@@ -74,7 +74,7 @@ void terminal_scroll()
 	}
 }
 
-void terminal_write(char * str)
+void terminal_write(const char* str)
 {
 	int index = 0;
 	while(str[index] != '\0') {
