@@ -106,8 +106,10 @@ void keyboard_handler()
 	keyactive[scancode & 0x7F] = 0;
   } else {
 	keyactive[scancode] = 1;
-	if(!keymap[scancode])
+	if(!keymap[scancode]) {
+  		interrupt_complete(KEYBOARD_IRQ);
 		return;
+	}
 	
 	if(keyactive[LEFT_SHIFT_CODE] || keyactive[RIGHT_SHIFT_CODE])
 		terminal_putchar(keymap_shift[scancode]);
