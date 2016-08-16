@@ -116,7 +116,7 @@ void terminal_putchar(char c)
 
 		case '\t':
 			cursor_x += 4;
-			if(cursor_x > VGA_SCREEN_WIDTH)
+			if(cursor_x >= VGA_SCREEN_WIDTH)
 			{
 				cursor_x = 4;
 				cursor_y++;
@@ -129,7 +129,7 @@ void terminal_putchar(char c)
 
       if(cursor_x == 0) {
         cursor_y -= 1;
-        cursor_x = VGA_SCREEN_WIDTH;
+        cursor_x = VGA_SCREEN_WIDTH - 1;
       } else {
         cursor_x -= 1;
       }
@@ -137,14 +137,14 @@ void terminal_putchar(char c)
       VGA_PTR[cursor_y * VGA_SCREEN_WIDTH + cursor_x] = vga_get_entry(' ', color);
       break;
 
-		default:
-			VGA_PTR[cursor_y * VGA_SCREEN_WIDTH + cursor_x] = vga_get_entry(c, color);
-			cursor_x++;
-			if(cursor_x > VGA_SCREEN_WIDTH) {
-				cursor_x = 0;
-				cursor_y++;
-			}
-			break;
+	default:
+		VGA_PTR[cursor_y * VGA_SCREEN_WIDTH + cursor_x] = vga_get_entry(c, color);
+		cursor_x++;
+		if(cursor_x >= VGA_SCREEN_WIDTH) {
+			cursor_x = 0;
+			cursor_y++;
+		}
+		break;
 	}
 
 	if(cursor_y > VGA_SCREEN_HEIGHT) {
