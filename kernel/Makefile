@@ -33,12 +33,13 @@ $(LIBK_OBJS) \
 main.o \
 terminal.o \
 paging.o \
-io.o \
 drivers/keyboard.o \
 drivers/de9.o \
-pic.o \
-idt_asm.o \
-idt.o \
+hal/io.o \
+hal/pic.o \
+hal/idt_asm.o \
+hal/idt.o \
+hal/hal.o \
 
 all: peakos.kernel
 

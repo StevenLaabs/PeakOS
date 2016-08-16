@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 #include <kernel/paging.h>
-#include <kernel/idt.h>
+#include <hal.h>
 #include <kernel/terminal.h>
 #include <drivers/keyboard.h>
 #include <drivers/de9.h>
@@ -62,8 +62,8 @@ void kinit()
 	terminal_init();
 	printf("Paging enabled with higher half...\n");
 	
-	idt_init();
-	printf("IDT initialized...\n");
+	hal_init();
+	printf("Initialized hardware abstraction layer...\n");
 	
 	keyboard_init();
 

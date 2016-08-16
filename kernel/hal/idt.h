@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+typedef void (*handler_func_t)(void);
+
 // 8 byte IDT entry
 struct idt_entry_t
 {
@@ -37,6 +39,8 @@ struct interrupt_data {
  * see https://www-s.acm.illinois.edu/sigops/2007/roll_your_own/i386/boot.html#predefsel for selector info
  */
 void idt_set_gate(uint8_t index, uint32_t isr_adr, uint16_t selector, uint8_t flags);
+
+void idt_install_handler(uint8_t int_num, void (*handler)());
 
 /*
  * Initializes the IDT by setting IDT gaates and loading the IDT pointer into the cpu

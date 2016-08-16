@@ -1,8 +1,10 @@
-#include <kernel/idt.h>
-#include <kernel/pic.h>
-#include <drivers/keyboard.h>
 #include <stdlib.h>
+#include <stddef.h>
 #include <stdio.h>
+#include <hal.h>
+#include <drivers/keyboard.h>
+
+#include "idt.h"
 
 // macro defines a function for the interrupt handler number
 #define NEW_INTERRUPT_HANDLER(i) extern void interrupt_handler_##i(void)
@@ -68,22 +70,17 @@ NEW_INTERRUPT_HANDLER(45);
 NEW_INTERRUPT_HANDLER(46);
 NEW_INTERRUPT_HANDLER(47);
 
+handler_func_t handlers[256] = { NULL };
+
 /*
  * General interrupt handler that takes in the interrupt number and sends it
  * to the appropriate handler
  */
 void interrupt_handler(struct interrupt_data data)
 {
-	if(data.int_num == 32) {
-		// this is the timer
-	} else if(data.int_num == 33) {
-		keyboard_handler();
-	}
-
-	if(data.int_num >= 32 && data.int_num < 48) {
-		irq_send_eoi(data.int_num - 32);
+	if(handlers[data.int_num] != NULL) {
+		handlers[data.int_num]();
 	} else if(data.int_num < 32) {
-
 		
 		printf("Interrupt: %i\tErr #: %i\n", (int)data.int_num, (int)data.error_code);
 		printf("EAX: %x\tEBX: %x\tECX: %x\tEDX: %x\n", (unsigned int)data.eax, (unsigned int)data.ebx, (unsigned int)data.ecx, (unsigned int)data.edx);
@@ -107,13 +104,14 @@ void idt_set_gate(uint8_t index, uint32_t isr_adr, uint16_t selector, uint8_t fl
 	idt[index].zero = 0;
 }
 
+void idt_install_handler(uint8_t int_num, void (*handler)())
+{
+	handlers[int_num] = handler;
+}
+
 void idt_init()
 {
-	__asm__
-	(
-		"cli\n"
-		"nop\n"
-	);
+	disable_interrupts();
 
 	idt = (struct idt_entry_t*)idt_contents;
 
@@ -180,11 +178,5 @@ void idt_init()
 		"lidt [eax]"
 	);
 
-	pic_map(0x20, 0x28);
-
-	__asm__
-	(
-		"sti\n"
-		"nop\n"
-	);
+	enable_interrupts();
 }

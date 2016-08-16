@@ -82,6 +82,7 @@ void terminal_write(const char* str)
 	}
 }
 
+// TODO: Remove? Might be deprecated
 void terminal_writeint(int val, int base)
 {
 	int start_val = val;

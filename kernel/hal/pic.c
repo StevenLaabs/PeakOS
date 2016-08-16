@@ -1,5 +1,7 @@
-#include <kernel/pic.h>
 #include <kernel/io.h>
+#include <hal.h>
+
+#include "pic.h"
 
 #define PICM_COMMAND 0x20 // new offset for master PIC
 #define PICM_DATA (PICM_COMMAND+1)
@@ -10,11 +12,7 @@
 
 void pic_map(int offset1, int offset2)
 {
-	__asm__
-	(
-		"cli\n"
-		"nop\n"
-	);
+	disable_interrupts();
 
 	// initialize
 	outb(PICM_COMMAND, 0x11);
@@ -34,11 +32,7 @@ void pic_map(int offset1, int offset2)
 	outb(PICM_DATA, 0xFF);
 	outb(PICS_DATA, 0xFF);
 
-	__asm__
-	(
-		"sti\n"
-		"nop\n"
-	);
+	enable_interrupts();
 }
 
 void irq_mask(uint8_t irq)

@@ -1,7 +1,9 @@
 #include <drivers/keyboard.h>
 #include <kernel/io.h>
 #include <kernel/terminal.h>
-#include <kernel/pic.h>
+#include <hal.h>
+
+#define KEYBOARD_IRQ 1
 
 // Keyboard ports for reading and writing data
 #define KEYBOARD_DATA_PORT 0x60
@@ -93,7 +95,7 @@ static uint8_t read_scancode()
 
 void keyboard_init()
 {
-	irq_unmask(IRQ_KEYBOARD);
+	irq_install(KEYBOARD_IRQ, keyboard_handler);
 }
 
 void keyboard_handler()
@@ -113,4 +115,6 @@ void keyboard_handler()
 	else
     	terminal_putchar(keymap[scancode]);
   }
+
+  interrupt_complete(KEYBOARD_IRQ);
 }
