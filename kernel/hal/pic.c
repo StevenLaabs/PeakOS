@@ -1,4 +1,3 @@
-#include <kernel/io.h>
 #include <hal.h>
 
 #include "pic.h"

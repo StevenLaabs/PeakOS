@@ -1,5 +1,4 @@
 #include <drivers/keyboard.h>
-#include <kernel/io.h>
 #include <kernel/terminal.h>
 #include <hal.h>
 

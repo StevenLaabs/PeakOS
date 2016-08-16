@@ -3,8 +3,6 @@
 
 #include <stdint.h>
 
-typedef void (*handler_func_t)(void);
-
 // 8 byte IDT entry
 struct idt_entry_t
 {

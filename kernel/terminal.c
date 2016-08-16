@@ -1,6 +1,7 @@
 #include <kernel/terminal.h>
-#include <kernel/vga.h>
-#include <kernel/io.h>
+#include <hal.h>
+
+#include "vga.h"
 
 #define CURSOR_CMD_PORT 0x3D4
 #define CURSOR_DATA_PORT 0x3D5

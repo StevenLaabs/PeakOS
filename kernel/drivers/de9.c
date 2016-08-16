@@ -1,4 +1,4 @@
-#include <kernel/io.h>
+#include <hal.h>
 #include <drivers/de9.h>
 
 #define DIVISOR_LOW 0
