@@ -33,9 +33,11 @@ peakos - Includes the README and some useful scripts for building and running
 │   │
 │   └───drivers - Driver code for handling certain hardware functionalities
 │   │
-│   └───include - header files for the kernel code
-│
-└───libc - Implementation of some useful c library functions
+│   └───hal - hardware abstraction layer for interfacing with hardware components
+│   │
+│   └───include - global header files for the kernel code
+│   │
+│   └───libk - Implementation of some useful c library functions for kernel use
 │
 └───images - screenshots of different parts of the OS
 ```
