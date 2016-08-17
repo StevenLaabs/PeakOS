@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include "pmm.h"
 
@@ -57,5 +58,65 @@ uint32_t map_find_free()
 
 void pmm_init(multiboot_info_t* mb_info)
 {
+	pmm.memory_size = mb_info->mem_size;
+	pmm.bitmap = mb_info->mmap_addr;;
+	pmm.max_blocks = (pmm.memory_size * 1024) / BLOCK_SIZE;
+	pmm.used_blocks = pmm.max_blocks;
+
+	// set all bits in the bitmap so everything is indicated as used
+	memset(pmm.bitmap, 0xFF, pmm.max_blocks / BLOCKS_PER_BYTE);
+
+	// TODO: Initialize certain regions here or in main
+}
+
+void pmm_init_region(uint32_t start_addr, size_t size)
+{
+	int align = start_addr / BLOCK_SIZE;
+	int blocks = size / BLOCK_SIZE;
+
+	for(; blocks > 0; blocks--) {
+		map_unset(align++);
+		pmm.used_blocks--;
+	}
+
+	map_set(0);
+}
+
+void pmm_deinit_region(uint32_t start_addr, size_t size)
+{
+	int align = start_addr / BLOCK_SIZE;
+	int blocks = size / BLOCK_SIZE;
+
+	for(; blocks > 0; blocks--) {
+		map_set(align++);
+		pmm.used_blocks++;
+	}
+}
+
+void* pmm_alloc_block()
+{
+	// check for available memory
+	if(pmm.max_blocks - pmm.used_blocks <= 0)
+		return 0;
 	
+	uint32_t block = map_find_free();
+	if(block == -1)
+		return 0;
+
+	map_set(block);
+	
+	uint32_t addr = block * BLOCK_SIZE;
+	pmm.used_blocks++;
+
+	return (void*)addr;
+}
+
+void pmm_free_block(void* mem)
+{
+	uint32_t addr = (uint32_t)mem;
+	uint32_t block = addr / BLOCK_SIZE;
+
+	map_unset(block);
+
+	pmm.used_blocks--;
 }
