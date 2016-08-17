@@ -7,6 +7,7 @@
 #include <kernel/terminal.h>
 #include <drivers/keyboard.h>
 #include <drivers/de9.h>
+#include <thirdp/multiboot.h>
 
 void issue_interrupt(unsigned char i)
 {
@@ -55,7 +56,7 @@ void issue_interrupt(unsigned char i)
 #if defined(__cplusplus)
 extern "C"
 #endif
-void kinit()
+void kinit(multiboot_info_t* mb_info)
 {
 	paging_init();
 

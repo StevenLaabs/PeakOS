@@ -95,6 +95,8 @@ _boot_start:
 
 	extern kinit
 	lea eax, [kinit - VIRTUAL_BASE_ADDR]
+
+	push dword (multiboot_info_structure - VIRTUAL_BASE_ADDR)
 	call eax
 
 	jmp hang
