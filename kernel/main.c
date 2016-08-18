@@ -8,6 +8,7 @@
 #include <drivers/keyboard.h>
 #include <drivers/de9.h>
 #include <thirdp/multiboot.h>
+#include "pmm.h"
 
 void issue_interrupt(unsigned char i)
 {
@@ -53,14 +54,50 @@ void issue_interrupt(unsigned char i)
 	}
 }
 
+
+extern uint32_t start_kernel_physical;
+extern uint32_t end_kernel_physical;
+extern uint32_t start_kernel_virtual;
+extern uint32_t end_kernel_virtual;
+
 #if defined(__cplusplus)
 extern "C"
 #endif
 void kinit(multiboot_info_t* mb_info)
 {
+	pmm_init(mb_info);
+
+	multiboot_memory_map_t* map_addr = (multiboot_memory_map_t*)mb_info->mmap_addr;
+	multiboot_memory_map_t* map_end = (multiboot_memory_map_t*)(mb_info->mmap_addr + mb_info->mmap_length);
+
+	while(map_addr != map_end) {
+		if(map_addr->type == MULTIBOOT_MEMORY_AVAILABLE)
+			pmm_init_region(map_addr->addr, map_addr->len);
+		else if(map_addr->type == MULTIBOOT_MEMORY_RESERVED)
+			pmm_deinit_region(map_addr->addr, map_addr->len);
+
+		map_addr++;
+	}
+
 	paging_init();
 
 	terminal_init();
+
+	map_addr = (multiboot_memory_map_t*)mb_info->mmap_addr;
+	map_end = (multiboot_memory_map_t*)(mb_info->mmap_addr + mb_info->mmap_length);
+	
+	printf("mmap_addr = 0x%x, mmap_end = 0x%x, mmap_length = 0x%x\n", 
+			(unsigned int)map_addr, (unsigned int)map_end, mb_info->mmap_length);
+
+	while(map_addr != map_end) {
+		printf(" size = 0x%x, start = 0x%x, end = 0x%x, type = 0x%x\n",
+				map_addr->size, (unsigned int)map_addr->addr, (unsigned int)(map_addr->addr + map_addr->len), map_addr->type);
+		map_addr++;
+	}
+
+	printf("\npmm regions initialized: %u allocation blocks, free: %u, used or reserved: %u\n\n", 
+			(unsigned int)pmm_get_num_blocks(), (unsigned int)pmm_get_num_free(), (unsigned int)pmm_get_num_used());
+
 	printf("Paging enabled with higher half...\n");
 	
 	hal_init();

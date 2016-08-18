@@ -1,42 +1,46 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-char* itoa(int num, char* str, int base)
+char* itoa(unsigned int num, char* str, unsigned int base)
 {
-	bool is_negative = false;
+	int pos = 0;
+	int opos = 0;
+	int top = 0;
 
-	if(num < 0 && base == 10) {
-		num = -num;
-		is_negative = true;
+	char temp[32];
+	char* digits = "0123456789ABCDEF";
+
+	// invalid base or 0 value
+	if(num == 0 || base > 16) {
+		str[0] = '0';
+		str[1] = '\0';
+		return str;
 	}
 
-	int start_num = num;
-	static char buf[32] = {0};
-
-	int i = 30;
-
-	for(; num && i; --i, num /= base)
-		buf[i] = "0123456789ABCDEF"[num % base];
-
-	int str_ind = 0;
-
-	if(base == 16) {
-		str[str_ind++] = '0';
-		str[str_ind++] = 'x';
-	} else if(base == 2) {
-		str[str_ind++] = '0';
-		str[str_ind++] = 'b';
-	} else if(is_negative) {
-		str[str_ind++] = '-';
+	while(num != 0) {
+		temp[pos] = digits[num % base];
+		pos++;
+		num /= base;
 	}
 
-	if(start_num == 0)
-		str[str_ind++] = '0';
-	else {
-		while(buf[++i] != '\0') {
-			str[str_ind++] = buf[i];
-		}
+	top = pos--;
+	for(opos = 0; opos < top; pos--, opos++) {
+		str[opos] = temp[pos];
 	}
+
+	str[opos] = 0;
 
 	return str;
+}
+
+char* itoa_signed(int num, char* str, unsigned int base)
+{
+	if(num < 0) {
+		*str++ = '-';
+		num *= -1;
+	}
+
+	itoa(num, str, base);
+
+	return --str;
 }

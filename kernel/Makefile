@@ -33,6 +33,7 @@ $(LIBK_OBJS) \
 main.o \
 terminal.o \
 paging.o \
+pmm.o \
 drivers/keyboard.o \
 drivers/de9.o \
 hal/io.o \

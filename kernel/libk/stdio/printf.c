@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include <stdbool.h>
 #include <string.h>
+#include <kernel/terminal.h>
 
 static void print(const char* data, size_t data_length)
 {
@@ -62,6 +63,17 @@ int printf(const char* restrict format, ...)
 			case 'i': {
 				format++;
 				int i = va_arg(args, int);
+				char str[20];
+				itoa_signed(i, str, 10);
+				int len = strlen(str);
+				print(str, len);
+				written += len;
+				break;
+			}
+
+			case 'u': {
+				format++;
+				int i = va_arg(args, unsigned int);
 				char str[20];
 				itoa(i, str, 10);
 				int len = strlen(str);

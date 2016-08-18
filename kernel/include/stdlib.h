@@ -2,7 +2,8 @@
 #define _stdlib_h
 
 int atoi(const char *str);
-char* itoa(int num, char* str, int base);
+char* itoa(unsigned int num, char* str, unsigned int base);
+char* itoa_signed(int num, char* str, unsigned int base);
 
 void abort(void);
 
