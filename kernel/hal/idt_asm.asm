@@ -10,6 +10,14 @@ interrupt_handler_%1:
 	push dword %1 ; push interrupt number for argument
 	pushad
 
+	mov eax, %1
+	cmp eax, 8
+	jne notthing_%1
+
+	xchg bx, bx
+
+notthing_%1:
+
 	mov ax, ds
 	push eax      ; push the data segment for argument
 

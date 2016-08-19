@@ -1,4 +1,5 @@
 #include <hal.h>
+#include <stdio.h>
 
 #include "idt.h"
 #include "pic.h"
@@ -8,6 +9,8 @@ void hal_init()
     idt_init();
 
     pic_map(0x20, 0x28);
+
+	enable_interrupts();
 }
 
 void enable_interrupts()

@@ -30,8 +30,6 @@ void pic_map(int offset1, int offset2)
 
 	outb(PICM_DATA, 0xFF);
 	outb(PICS_DATA, 0xFF);
-
-	enable_interrupts();
 }
 
 void irq_mask(uint8_t irq)

@@ -70,7 +70,7 @@ NEW_INTERRUPT_HANDLER(45);
 NEW_INTERRUPT_HANDLER(46);
 NEW_INTERRUPT_HANDLER(47);
 
-handler_func_t handlers[256] = { NULL };
+void (*handlers[256])() = { NULL };
 
 /*
  * General interrupt handler that takes in the interrupt number and sends it
@@ -177,6 +177,4 @@ void idt_init()
 		"mov eax, [idt_pointer]\n"
 		"lidt [eax]"
 	);
-
-	enable_interrupts();
 }
