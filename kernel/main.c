@@ -65,10 +65,22 @@ extern "C"
 #endif
 void kinit(multiboot_info_t* mb_info)
 {
-	pmm_init(mb_info);
+	paging_init();
+
+	terminal_init();
+
+	printf("Paging enabled with higher half...\n");
+
+	hal_init();
+	printf("Initialized hardware abstraction layer...\n\n");
 
 	multiboot_memory_map_t* map_addr = (multiboot_memory_map_t*)mb_info->mmap_addr;
 	multiboot_memory_map_t* map_end = (multiboot_memory_map_t*)(mb_info->mmap_addr + mb_info->mmap_length);
+
+	printf("mmap_addr = 0x%x, mmap_end = 0x%x, mmap_length = 0x%x\n", 
+			(unsigned int)map_addr, (unsigned int)map_end, mb_info->mmap_length);
+
+	pmm_init(mb_info);
 
 	while(map_addr != map_end) {
 		if(map_addr->type == MULTIBOOT_MEMORY_AVAILABLE)
@@ -76,32 +88,15 @@ void kinit(multiboot_info_t* mb_info)
 		else if(map_addr->type == MULTIBOOT_MEMORY_RESERVED)
 			pmm_deinit_region(map_addr->addr, map_addr->len);
 
-		map_addr++;
-	}
+		printf(" size = 0x%x, start = 0x%x, size = 0x%x, type = 0x%x\n",
+			map_addr->size, (unsigned int)map_addr->addr, (unsigned int)(map_addr->len), map_addr->type);
 
-	paging_init();
-
-	terminal_init();
-
-	map_addr = (multiboot_memory_map_t*)mb_info->mmap_addr;
-	map_end = (multiboot_memory_map_t*)(mb_info->mmap_addr + mb_info->mmap_length);
-	
-	printf("mmap_addr = 0x%x, mmap_end = 0x%x, mmap_length = 0x%x\n", 
-			(unsigned int)map_addr, (unsigned int)map_end, mb_info->mmap_length);
-
-	while(map_addr != map_end) {
-		printf(" size = 0x%x, start = 0x%x, end = 0x%x, type = 0x%x\n",
-				map_addr->size, (unsigned int)map_addr->addr, (unsigned int)(map_addr->addr + map_addr->len), map_addr->type);
 		map_addr++;
 	}
 
 	printf("\npmm regions initialized: %u allocation blocks, free: %u, used or reserved: %u\n\n", 
 			(unsigned int)pmm_get_num_blocks(), (unsigned int)pmm_get_num_free(), (unsigned int)pmm_get_num_used());
-
-	printf("Paging enabled with higher half...\n");
 	
-	hal_init();
-	printf("Initialized hardware abstraction layer...\n");
 	
 	keyboard_init();
 
