@@ -6,9 +6,8 @@
 #define BLOCKS_PER_BYTE 8
 #define BLOCK_SIZE 4096
 
-static uint32_t memory_size;
-static uint32_t used_blocks;
-static uint32_t max_blocks;
+static uint32_t used_blocks = 0;
+static uint32_t max_blocks = 0;
 static uint32_t* bitmap;
 
 // Sets a specific bit contained within the bitmap
@@ -54,9 +53,18 @@ void pmm_init(multiboot_info_t* mb_info)
 {
 	extern uint32_t end_kernel_physical;
 
-	memory_size = mb_info->mem_size;
 	bitmap = (uint32_t*)(&end_kernel_physical);
-	max_blocks = (memory_size * 1024) / BLOCK_SIZE;
+	
+	multiboot_memory_map_t* map_addr = (multiboot_memory_map_t*)mb_info->mmap_addr;
+	while(map_addr != (multiboot_memory_map_t*)(mb_info->mmap_addr + mb_info->mmap_length)) {
+		max_blocks += map_addr->len / BLOCK_SIZE;
+		
+		if(map_addr->type == MULTIBOOT_MEMORY_RESERVED)
+			used_blocks += map_addr->len / BLOCK_SIZE;
+
+		map_addr++;
+	}
+
 	used_blocks = max_blocks;
 
 	// set all bits in the bitmap so everything is indicated as used
