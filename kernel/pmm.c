@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "pmm.h"
 
@@ -51,6 +52,7 @@ static int32_t map_find_free()
 
 void pmm_init(multiboot_info_t* mb_info)
 {
+	extern uint32_t start_kernel_physical;
 	extern uint32_t end_kernel_physical;
 
 	bitmap = (uint32_t*)(&end_kernel_physical);
@@ -58,27 +60,47 @@ void pmm_init(multiboot_info_t* mb_info)
 	multiboot_memory_map_t* map_addr = (multiboot_memory_map_t*)mb_info->mmap_addr;
 	while(map_addr != (multiboot_memory_map_t*)(mb_info->mmap_addr + mb_info->mmap_length)) {
 		max_blocks += map_addr->len / BLOCK_SIZE;
-		
-		if(map_addr->type == MULTIBOOT_MEMORY_RESERVED)
-			used_blocks += map_addr->len / BLOCK_SIZE;
 
 		map_addr++;
 	}
 
-	used_blocks = max_blocks;
-
 	// set all bits in the bitmap so everything is indicated as used
 	memset(bitmap, 0xFF, max_blocks / BLOCKS_PER_BYTE);
+	used_blocks = max_blocks;
+	
+	// reserve and free blocks according to the mmap from multiboot
+	// keep the first 1MB marked as reserved to preserve things such as
+	// the multiboot structures
+	map_addr = (multiboot_memory_map_t*)mb_info->mmap_addr;
+	while(map_addr != (multiboot_memory_map_t*)(mb_info->mmap_addr + mb_info->mmap_length)) {
+		if(map_addr->addr >= 0x100000 && map_addr->type == MULTIBOOT_MEMORY_AVAILABLE) {
+			pmm_init_region(map_addr->addr, map_addr->len);	
+		}
+
+		map_addr++;
+	}
+
+	// make sure the kernel memory is reserved
+	pmm_deinit_region((uint32_t)&start_kernel_physical, (size_t)(&end_kernel_physical - &start_kernel_physical));
+
+	// reserve the memory space taken up by the bitmap
+	pmm_deinit_region((uint32_t)bitmap, (size_t)(&bitmap[max_blocks / 32] - bitmap));
+
 }
 
 void pmm_init_region(uint32_t start_addr, size_t size)
 {
 	int align = start_addr / BLOCK_SIZE;
 	int blocks = size / BLOCK_SIZE;
+	
+	if(blocks == 0)
+		blocks = 1;
 
 	for(; blocks > 0; blocks--) {
-		map_unset(align++);
-		used_blocks--;
+		if(map_check(align)) {
+			map_unset(align++);
+			used_blocks--;
+		}
 	}
 
 	map_set(0);
@@ -89,9 +111,14 @@ void pmm_deinit_region(uint32_t start_addr, size_t size)
 	int align = start_addr / BLOCK_SIZE;
 	int blocks = size / BLOCK_SIZE;
 
+	if(blocks == 0)
+		blocks = 1;
+
 	for(; blocks > 0; blocks--) {
-		map_set(align++);
-		used_blocks++;
+		if(!map_check(align)) {
+			map_set(align++);
+			used_blocks++;
+		}
 	}
 }
 

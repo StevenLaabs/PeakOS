@@ -72,31 +72,27 @@ void kinit(multiboot_info_t* mb_info)
 	printf("Paging enabled with higher half...\n");
 
 	hal_init();
-	printf("Initialized hardware abstraction layer...\n\n");
-
-	multiboot_memory_map_t* map_addr = (multiboot_memory_map_t*)mb_info->mmap_addr;
-	multiboot_memory_map_t* map_end = (multiboot_memory_map_t*)(mb_info->mmap_addr + mb_info->mmap_length);
-
-	printf("mmap_addr = 0x%x, mmap_end = 0x%x, mmap_length = 0x%x\n", 
-			(unsigned int)map_addr, (unsigned int)map_end, mb_info->mmap_length);
+	printf("Initialized hardware abstraction layer...\n");
 
 	pmm_init(mb_info);
 
-	while(map_addr != map_end) {
-		if(map_addr->type == MULTIBOOT_MEMORY_AVAILABLE)
-			pmm_init_region(map_addr->addr, map_addr->len);
-		else if(map_addr->type == MULTIBOOT_MEMORY_RESERVED)
-			pmm_deinit_region(map_addr->addr, map_addr->len);
-
-		printf(" size = 0x%x, start = 0x%x, size = 0x%x, type = 0x%x\n",
-			map_addr->size, (unsigned int)map_addr->addr, (unsigned int)(map_addr->len), map_addr->type);
-
-		map_addr++;
-	}
-
-	printf("\npmm regions initialized: %u allocation blocks, free: %u, used or reserved: %u\n\n", 
+	printf("Initialized pmm: %u allocation blocks, %u free, %u used or reserved\n\n", 
 			(unsigned int)pmm_get_num_blocks(), (unsigned int)pmm_get_num_free(), (unsigned int)pmm_get_num_used());
 	
+	void* p = pmm_alloc_block();
+	printf("p allocated at 0x%x\n", (uint32_t)p);
+
+	void* q = pmm_alloc_block();
+	printf("q allocated at 0x%x\n", (uint32_t)q);
+	
+	pmm_free_block(p);
+	printf("Deallocated p\n");
+
+	p = pmm_alloc_block();
+	printf("p reallocated at 0x%x\n", (uint32_t)p);
+
+	void *r = pmm_alloc_block();
+	printf("r allocated at 0x%x\n\n", (uint32_t)r);
 	
 	keyboard_init();
 
