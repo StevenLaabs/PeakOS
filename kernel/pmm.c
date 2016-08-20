@@ -50,8 +50,11 @@ static int32_t map_find_free()
 	return -1;
 }
 
-void pmm_init(multiboot_info_t* mb_info)
+uint8_t pmm_init(multiboot_info_t* mb_info)
 {
+	if(!(mb_info->flags & (1 << 6)))
+		return 0;
+
 	extern uint32_t start_kernel_physical;
 	extern uint32_t end_kernel_physical;
 
@@ -86,6 +89,7 @@ void pmm_init(multiboot_info_t* mb_info)
 	// reserve the memory space taken up by the bitmap
 	pmm_deinit_region((uint32_t)bitmap, (size_t)(&bitmap[max_blocks / 32] - bitmap));
 
+	return 1;
 }
 
 void pmm_init_region(uint32_t start_addr, size_t size)

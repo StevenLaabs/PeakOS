@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <thirdp/multiboot.h>
 
-void pmm_init(multiboot_info_t* mb_info);
+uint8_t  pmm_init(multiboot_info_t* mb_info);
 
 void pmm_init_region(uint32_t start_addr, size_t size);
 

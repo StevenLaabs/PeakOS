@@ -74,25 +74,32 @@ void kinit(multiboot_info_t* mb_info)
 	hal_init();
 	printf("Initialized hardware abstraction layer...\n");
 
-	pmm_init(mb_info);
-
-	printf("Initialized pmm: %u allocation blocks, %u free, %u used or reserved\n\n", 
+	if(pmm_init(mb_info)) {
+		printf("Initialized pmm: %u allocation blocks, %u free, %u used or reserved\n\n", 
 			(unsigned int)pmm_get_num_blocks(), (unsigned int)pmm_get_num_free(), (unsigned int)pmm_get_num_used());
+	} else {
+		printf("Failed to initialize pmm. Check the flags in the multiboot structure");
+	}
+
 	
 	void* p = pmm_alloc_block();
-	printf("p allocated at 0x%x\n", (uint32_t)p);
+	if(p)
+		printf("p allocated at 0x%x\n", (uint32_t)p);
 
 	void* q = pmm_alloc_block();
-	printf("q allocated at 0x%x\n", (uint32_t)q);
+	if(q)
+		printf("q allocated at 0x%x\n", (uint32_t)q);
 	
 	pmm_free_block(p);
 	printf("Deallocated p\n");
 
 	p = pmm_alloc_block();
-	printf("p reallocated at 0x%x\n", (uint32_t)p);
+	if(p)
+		printf("p reallocated at 0x%x\n", (uint32_t)p);
 
 	void *r = pmm_alloc_block();
-	printf("r allocated at 0x%x\n\n", (uint32_t)r);
+	if(r)
+		printf("r allocated at 0x%x\n\n", (uint32_t)r);
 	
 	keyboard_init();
 
