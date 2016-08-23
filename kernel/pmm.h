@@ -2,6 +2,7 @@
 #define _PMM_H
 
 #include <stdint.h>
+#include <stddef.h>
 #include <thirdp/multiboot.h>
 
 uint8_t  pmm_init(multiboot_info_t* mb_info);

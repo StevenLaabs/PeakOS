@@ -76,7 +76,7 @@ void kinit(multiboot_info_t* mb_info)
 
 	if(pmm_init(mb_info)) {
 		printf("Initialized pmm: %u allocation blocks, %u free, %u used or reserved\n\n", 
-			(unsigned int)pmm_get_num_blocks(), (unsigned int)pmm_get_num_free(), (unsigned int)pmm_get_num_used());
+			(unsigned)pmm_get_num_blocks(), (unsigned)pmm_get_num_free(), (unsigned)pmm_get_num_used());
 	} else {
 		printf("Failed to initialize pmm. Check the flags in the multiboot structure");
 	}
@@ -84,22 +84,22 @@ void kinit(multiboot_info_t* mb_info)
 	
 	void* p = pmm_alloc_block();
 	if(p)
-		printf("p allocated at 0x%x\n", (uint32_t)p);
+		printf("p allocated at 0x%x\n", (unsigned)p);
 
 	void* q = pmm_alloc_block();
 	if(q)
-		printf("q allocated at 0x%x\n", (uint32_t)q);
+		printf("q allocated at 0x%x\n", (unsigned)q);
 	
 	pmm_free_block(p);
 	printf("Deallocated p\n");
 
 	p = pmm_alloc_block();
 	if(p)
-		printf("p reallocated at 0x%x\n", (uint32_t)p);
+		printf("p reallocated at 0x%x\n", (unsigned)p);
 
 	void *r = pmm_alloc_block();
 	if(r)
-		printf("r allocated at 0x%x\n\n", (uint32_t)r);
+		printf("r allocated at 0x%x\n\n", (unsigned)r);
 	
 	keyboard_init();
 
