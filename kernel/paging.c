@@ -7,6 +7,7 @@ typedef uint32_t virtual_addr;
 
 #define NUM_ENTRIES 1024
 #define NUM_TABLES 1024
+#define PHYSICAL_BASE_ADDR 0x100000
 #define VIRTUAL_BASE_ADDR 0xC0000000
 #define KERNEL_PAGE_INDEX (VIRTUAL_BASE_ADDR >> 22)
 
@@ -65,8 +66,6 @@ struct page_directory {
 };
 typedef struct page_directory page_directory_t;
 
-extern uint32_t page_tables[NUM_ENTRIES * NUM_TABLES];
-extern uint32_t page_directory[NUM_ENTRIES];
 
 page_directory_t* current_directory;
 
@@ -88,11 +87,54 @@ inline bool paging_switch_directory(page_directory_t* directory)
 
 void paging_init()
 {
+	extern page_table_t* temp_page_table;
+	extern page_directory_t* page_directory;
+	
 	// Get physical addresses of the page tables to identity map
-	uint32_t * physical_page_table_1 = (uint32_t *)((uint32_t) page_tables - VIRTUAL_BASE_ADDR);
-	uint32_t * physical_page_directory = (uint32_t *)((uint32_t) page_directory - VIRTUAL_BASE_ADDR);
+	page_table_t* physical_page_table = temp_page_table - VIRTUAL_BASE_ADDR;
+	page_directory_t* physical_page_directory = page_directory - VIRTUAL_BASE_ADDR;
 
-	uint32_t flags = 3;
+	// Identity map the first 4MB of memory to the page table
+	uint32_t physical = 0;
+	uint32_t virtual = 0;
+	for(uint32_t i = 0; i < 1024; i++) {
+		pte_t page = { 0 };
+		page.present = 0x1;
+		page.address = physical >> 12;
+
+		physical_page_table->entries[PAGE_TABLE_INDEX(virtual)] = page;
+
+		physical += 4096;
+		virtual += 4096;
+	}
+
+	pde_t* dir_entry = &physical_page_directory->entries[PAGE_DIR_INDEX(PHYSICAL_BASE_ADDR)];
+	dir_entry->present = 0x1;
+	dir_entry->writable = WRITE;
+	dir_entry->address = ((uint32_t)physical_page_table) >> 12;
+
+	// map physical memory starting at 1MB to virtual memory at 3GB
+	physical = PHYSICAL_BASE_ADDR;
+	virtual = VIRTUAL_BASE_ADDR;
+	for(uint32_t i = 0; i < 1024; i++) {
+		pte_t page = { 0 };
+		page.present = 0x1;
+		page.address = physical >> 12;
+
+		physical_page_table->entries[PAGE_TABLE_INDEX(virtual)] = page;
+
+		physical += 4096;
+		virtual += 4096;
+	}
+
+	dir_entry = &physical_page_directory->entries[PAGE_DIR_INDEX(VIRTUAL_BASE_ADDR)];
+	dir_entry->present = 0x1;
+	dir_entry->writable = WRITE;
+	dir_entry->address = ((uint32_t)physical_page_table) >> 12;
+
+	current_directory = physical_page_directory;
+
+	/*uint32_t flags = 3;
 	uint32_t num_page_tables = 4;
 	uint32_t size_of_tables = num_page_tables * NUM_ENTRIES;
 
@@ -107,16 +149,15 @@ void paging_init()
 		physical_page_table_1[i + start_entry_index] = (i * 4096) | flags;
 	}
 
-	// map the page directory to the tables
-	start_entry_index = (uint32_t)physical_page_table_1;
-	for(unsigned int i = 0; i < NUM_ENTRIES; i++) {
-		physical_page_directory[i] = (start_entry_index + (i * 4096)) | flags;
-	}
+	// map the page directory to the table
+	start_entry_index = (uint32_t)physical_page_table;
+	physical_page_directory->entries[KERNEL_PAGE_INDEX] = physical_page_table;
+*/
 
 	// load page directory pointer into cr3
 	__asm__
 	(
-		"lea ecx, [page_directory - 0xC0000000]\n"
+		"lea ecx, [physical_page_directory]\n"
 		"mov cr3, ecx\n"
 	);
 
