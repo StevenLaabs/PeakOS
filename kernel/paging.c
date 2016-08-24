@@ -1,75 +1,23 @@
 #include <stdbool.h>
 #include <string.h>
 #include <kernel/paging.h>
+
 #include "pmm.h"
+#include "page_dir.h"
+#include "page_table.h"
 
 typedef uint32_t virtual_addr;
 
-#define NUM_ENTRIES 1024
-#define NUM_TABLES 1024
 #define PHYSICAL_BASE_ADDR 0x100000
 #define VIRTUAL_BASE_ADDR 0xC0000000
 #define KERNEL_PAGE_INDEX (VIRTUAL_BASE_ADDR >> 22)
+#define PAGE_PHYSICAL_ADDR(x) (*x & ~0xFFF)
 
 #define PAGE_SIZE 4096
 
-#define READ 0
-#define WRITE 1
-#define SUPERVISOR 0
-#define USER 1
-#define WRITE_BACK 0
-#define WRITE_THROUGH 1
+pde_t* current_directory;
 
-#define PAGE_DIR_INDEX(i) (((i) >> 22) & 0x3FF)
-#define PAGE_TABLE_INDEX(i) (((i) >> 12) & 0x3FF)
-#define PAGE_PHYSICAL_ADDR(a) (*a & ~0xFFF)
-
-struct pte {
-	uint32_t present : 1;
-	uint32_t writable : 1;
-	uint32_t mode : 1;
-	uint32_t reserved_intel : 2;
-	uint32_t accessed : 1;
-	uint32_t dirty : 1;
-	uint32_t reserved : 2;
-
-	uint32_t available : 3;
-
-	uint32_t address : 20;
-} __attribute__((packed));
-typedef struct pte pte_t;
-
-struct pde {
-	uint32_t present : 1;
-	uint32_t writable : 1;
-	uint32_t mode : 1;
-	uint32_t write_through : 1;
-	uint32_t cache_enabled : 1;
-	uint32_t accessed : 1;
-	uint32_t reserved : 1;
-	uint32_t size : 1;
-	uint32_t global : 1;
-
-	uint32_t available : 3;
-
-	uint32_t address: 20;
-} __attribute__((packed));
-typedef struct pde pde_t;
-
-struct page_table {
-	pte_t entries[NUM_ENTRIES];
-};
-typedef struct page_table page_table_t;
-
-struct page_directory {
-	pde_t entries[NUM_TABLES];
-};
-typedef struct page_directory page_directory_t;
-
-
-page_directory_t* current_directory;
-
-inline bool paging_switch_directory(page_directory_t* directory)
+inline bool paging_switch_directory(pde_t* directory)
 {
 	if(!directory)
 		return false;
@@ -87,78 +35,35 @@ inline bool paging_switch_directory(page_directory_t* directory)
 
 void paging_init()
 {
-	extern page_table_t* temp_page_table;
-	extern page_directory_t* page_directory;
-	
+	extern pte_t kernel_page_table[1024];
+	extern pde_t page_directory[1024];
+
 	// Get physical addresses of the page tables to identity map
-	page_table_t* physical_page_table = temp_page_table - VIRTUAL_BASE_ADDR;
-	page_directory_t* physical_page_directory = page_directory - VIRTUAL_BASE_ADDR;
+	pte_t* physical_page_table = (pte_t*)((pte_t)kernel_page_table - VIRTUAL_BASE_ADDR);
+	pde_t* physical_page_directory = (pde_t*)((pde_t)page_directory - VIRTUAL_BASE_ADDR);
 
-	// Identity map the first 4MB of memory to the page table
-	uint32_t physical = 0;
-	uint32_t virtual = 0;
-	for(uint32_t i = 0; i < 1024; i++) {
-		pte_t page = { 0 };
-		page.present = 0x1;
-		page.address = physical >> 12;
-
-		physical_page_table->entries[PAGE_TABLE_INDEX(virtual)] = page;
-
-		physical += 4096;
-		virtual += 4096;
+	// map the page table to the first 4MB
+	for(unsigned int i = 0; i < NUM_ENTRIES; i++) {
+		pte_set_address(&physical_page_table[i], i * PAGE_SIZE);
+		pte_set_properties(&physical_page_table[i], PRESENT | WRITABLE);
 	}
 
-	pde_t* dir_entry = &physical_page_directory->entries[PAGE_DIR_INDEX(PHYSICAL_BASE_ADDR)];
-	dir_entry->present = 0x1;
-	dir_entry->writable = WRITE;
-	dir_entry->address = ((uint32_t)physical_page_table) >> 12;
+	// Identity map the first 4MB using a 4MB page
+	pde_set_address(&physical_page_directory[0], 0x0);
+	pde_set_properties(&physical_page_directory[0], PRESENT | WRITABLE | PAGE_MB);
 
-	// map physical memory starting at 1MB to virtual memory at 3GB
-	physical = PHYSICAL_BASE_ADDR;
-	virtual = VIRTUAL_BASE_ADDR;
-	for(uint32_t i = 0; i < 1024; i++) {
-		pte_t page = { 0 };
-		page.present = 0x1;
-		page.address = physical >> 12;
+	// Map the virtual kernel address to the physical kernel memory
+	pde_set_address(&physical_page_directory[KERNEL_PAGE_INDEX], (uint32_t)physical_page_table);
+	pde_set_properties(&physical_page_directory[KERNEL_PAGE_INDEX], PRESENT | WRITABLE);
 
-		physical_page_table->entries[PAGE_TABLE_INDEX(virtual)] = page;
-
-		physical += 4096;
-		virtual += 4096;
-	}
-
-	dir_entry = &physical_page_directory->entries[PAGE_DIR_INDEX(VIRTUAL_BASE_ADDR)];
-	dir_entry->present = 0x1;
-	dir_entry->writable = WRITE;
-	dir_entry->address = ((uint32_t)physical_page_table) >> 12;
-
-	current_directory = physical_page_directory;
-
-	/*uint32_t flags = 3;
-	uint32_t num_page_tables = 4;
-	uint32_t size_of_tables = num_page_tables * NUM_ENTRIES;
-
-	// initialize page table entries
-	for(unsigned int i = 0; i < size_of_tables; i++) {
-		physical_page_table_1[i] = (i * 4096) | flags;
-	}
-
-	// identity map the kernel addresses in the page table
-	uint32_t start_entry_index = (KERNEL_PAGE_INDEX * 1024);
-	for(unsigned int i = 0; i < size_of_tables; i++) {
-		physical_page_table_1[i + start_entry_index] = (i * 4096) | flags;
-	}
-
-	// map the page directory to the table
-	start_entry_index = (uint32_t)physical_page_table;
-	physical_page_directory->entries[KERNEL_PAGE_INDEX] = physical_page_table;
-*/
-
-	// load page directory pointer into cr3
+	// load page directory pointer into cr3 and set enable 4MB pages
 	__asm__
 	(
-		"lea ecx, [physical_page_directory]\n"
+		"lea ecx, [page_directory - 0xC0000000]\n"
 		"mov cr3, ecx\n"
+		"mov ecx, cr4\n"
+    	"or ecx, 0x00000010\n"
+    	"mov cr4, ecx\n"
 	);
 
 	// initialize paging by setting bit 31 in cr0
@@ -175,8 +80,10 @@ void paging_init()
 		"lea ecx, [higher_half]\n"
 		"jmp ecx\n"
 		"higher_half:\n"
-		"nop\n"
+		"invlpg [0]\n"
 	);
+
+	current_directory = page_directory;
 }
 
 bool page_alloc(pte_t* entry)
@@ -188,44 +95,45 @@ bool page_alloc(pte_t* entry)
 		return false;
 
 	// map the entry address and make it present
-	entry->address = ((uint32_t)phys) >> 12;
-	entry->present = 0x1;
+	pte_set_address(entry, (uint32_t)phys);
+	pte_set_properties(entry, PRESENT);
 
 	return true;
 }
 
 void page_free(pte_t* entry)
 {
-	void* phys = (void*)(entry->address << 12);
+	void* phys = (void*)(pte_get_address(*entry));
 	
 	if(phys)
 		pmm_free_block(phys);
 
-	entry->present = 0x0;
+	pte_unset_properties(entry, PRESENT);
 }
 
-pte_t* page_table_get_entry(page_table_t* pt, virtual_addr addr)
+pte_t* page_table_get_entry(pte_t* table, virtual_addr addr)
 {
-	if(pt)
-		return &pt->entries[PAGE_TABLE_INDEX(addr)];
+	if(table)
+		return &table[PAGE_TABLE_INDEX(addr)];
 	
 	return 0;
 }
 
-pde_t* page_dir_get_entry(page_directory_t* pd, virtual_addr addr)
+pde_t* page_dir_get_entry(pde_t* directory, virtual_addr addr)
 {
-	if(pd)
-		return &pd->entries[PAGE_DIR_INDEX(addr)];
+	if(directory)
+		return &directory[PAGE_DIR_INDEX(addr)];
 
 	return 0;
 }
 
-page_directory_t* page_dir_get_current()
+pde_t* page_dir_get_current()
 {
 	return current_directory;
 }
 
-/*void paging_invalidate_entry(virtual_addr addr)
+/*
+void paging_invalidate_entry(virtual_addr addr)
 {
 	__asm__
 	(
@@ -237,28 +145,27 @@ page_directory_t* page_dir_get_current()
 
 void paging_map_page(void* physical, void* virtual)
 {
-	page_directory_t* directory = page_dir_get_current();
-	pde_t* dir_entry = &directory->entries[PAGE_DIR_INDEX((uint32_t)virtual)];
+	pde_t* directory = page_dir_get_current();
+	pde_t* dir_entry = &directory[PAGE_DIR_INDEX((uint32_t)virtual)];
 
 	// make the page table if it is not present
-	if(!dir_entry->present) {
-		page_table_t* table = (page_table_t*) pmm_alloc_block();
+	if(!pde_test_properties(*dir_entry, PRESENT)) {
+		pte_t* table = (pte_t*)pmm_alloc_block();
 		if(!table)
 			return;
 
-		memset(table, 0, sizeof(page_table_t));
+		memset(table, 0, sizeof(pte_t) * NUM_ENTRIES);
 
-		pde_t* entry = &directory->entries[PAGE_DIR_INDEX((uint32_t)virtual)];
-		entry->present = 0x1;
-		entry->writable = WRITE;
-		entry->address = ((virtual_addr)virtual) >> 12;
+		pde_t* entry = &directory[PAGE_DIR_INDEX((uint32_t)virtual)];
+		pde_set_address(entry, (uint32_t)virtual);
+		pde_set_properties(entry, PRESENT | WRITABLE);
 	}
 
-	page_table_t* table = (page_table_t*)PAGE_PHYSICAL_ADDR((uint32_t*)dir_entry);
-	pte_t* table_entry = &table->entries[PAGE_TABLE_INDEX((uint32_t)virtual)];
+	pte_t* table = (pte_t*)PAGE_PHYSICAL_ADDR((uint32_t*)dir_entry);
+	pte_t* table_entry = &table[PAGE_TABLE_INDEX((uint32_t)virtual)];
 
-	table_entry->address = ((uint32_t)physical) >> 12;
-	table_entry->present = 0x1;
+	pte_set_address(table_entry, (uint32_t)physical);
+	pte_set_properties(table_entry, PRESENT);
 }
 
 

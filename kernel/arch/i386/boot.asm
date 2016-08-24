@@ -120,19 +120,21 @@ hang:
 	hlt
 	jmp hang
 
-section .bss
-GLOBAL page_tables
+section .data
+GLOBAL kernel_page_table
 GLOBAL page_directory
+
+align 4096
+kernel_page_table:
+	times 1024 dd 0                      ; 1 table, 1024 entries per table, 4 bytes per entry
+
+page_directory:
+	times 1024 dd 0                    ; 1 directory with 1024 table entries, 4 bytes per entry
+
+section .bss
 
 align 4
 stack_bottom:
 	resb 0x4000                            ; Allocate 16k memory for the stack 
 stack_top:
 
-align 4096
-
-page_table:
-	resb (1024 * 4)                        ; 1 table, 1024 entries per table, 4 bytes per entry
-
-page_directory:
-	resb (1024 * 4)                    ; 1 directory with 1024 table entries, 4 bytes per entry
