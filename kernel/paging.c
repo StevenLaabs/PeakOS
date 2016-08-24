@@ -1,37 +1,21 @@
 #include <stdbool.h>
 #include <string.h>
-#include <kernel/paging.h>
 
-#include "pmm.h"
+#include "paging.h"
 #include "page_dir.h"
 #include "page_table.h"
-
-typedef uint32_t virtual_addr;
+#include "pmm.h"
 
 #define PHYSICAL_BASE_ADDR 0x100000
 #define VIRTUAL_BASE_ADDR 0xC0000000
 #define KERNEL_PAGE_INDEX (VIRTUAL_BASE_ADDR >> 22)
+
+// get the physical address of a table entry
 #define PAGE_PHYSICAL_ADDR(x) (*x & ~0xFFF)
 
 #define PAGE_SIZE 4096
 
 pde_t* current_directory;
-
-inline bool paging_switch_directory(pde_t* directory)
-{
-	if(!directory)
-		return false;
-
-	current_directory = directory;
-	
-	__asm__
-	(
-		"lea ecx, [current_directory]\n"
-		"mov cr3, ecx\n"
-	);
-
-	return true;
-}
 
 void paging_init()
 {
@@ -80,6 +64,13 @@ void paging_init()
 		"lea ecx, [higher_half]\n"
 		"jmp ecx\n"
 		"higher_half:\n"
+	);
+
+	// invalidate the 4MB page at start of directory as it is no longer needed
+	__asm__
+	(
+		"mov ecx, 0\n"
+		"mov dword [page_directory], ecx\n"
 		"invlpg [0]\n"
 	);
 
@@ -132,17 +123,6 @@ pde_t* page_dir_get_current()
 	return current_directory;
 }
 
-/*
-void paging_invalidate_entry(virtual_addr addr)
-{
-	__asm__
-	(
-		"cli\n"
-		"invlpg addr\n"
-		"sti\n"
-	);
-}*/
-
 void paging_map_page(void* physical, void* virtual)
 {
 	pde_t* directory = page_dir_get_current();
@@ -168,7 +148,33 @@ void paging_map_page(void* physical, void* virtual)
 	pte_set_properties(table_entry, PRESENT);
 }
 
+bool paging_switch_directory(pde_t* directory)
+{
+	if(!directory)
+		return false;
 
+	current_directory = directory;
+	
+	__asm__
+	(
+		"lea ecx, [current_directory]\n"
+		"mov cr3, ecx\n"
+	);
+
+	return true;
+}
+
+void paging_invalidate_entry(virtual_addr address)
+{
+	__asm__
+	(
+		"cli\n"
+		"invlpg [%0]\n"
+		"sti\n"
+		:
+		: "r" (address)
+	);
+}
 
 
 

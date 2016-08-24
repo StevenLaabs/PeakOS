@@ -2,12 +2,13 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include <kernel/paging.h>
 #include <hal.h>
 #include <kernel/terminal.h>
 #include <drivers/keyboard.h>
 #include <drivers/de9.h>
 #include <thirdp/multiboot.h>
+
+#include "paging.h"
 #include "pmm.h"
 
 void issue_interrupt(unsigned char i)

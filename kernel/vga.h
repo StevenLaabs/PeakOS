@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 // Starting point of the VGA text mode buffer address
-#define VGA_BUFFER 0xB8000
+#define VGA_BUFFER 0xC00B8000
 #define VGA_SCREEN_WIDTH 80
 #define VGA_SCREEN_HEIGHT 25
 
