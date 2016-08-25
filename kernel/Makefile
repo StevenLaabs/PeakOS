@@ -34,6 +34,7 @@ main.o \
 terminal.o \
 paging.o \
 pmm.o \
+kheap.o \
 drivers/keyboard.o \
 drivers/de9.o \
 hal/io.o \
