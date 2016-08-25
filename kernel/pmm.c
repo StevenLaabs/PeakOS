@@ -96,7 +96,7 @@ uint8_t pmm_init(multiboot_info_t* mb_info)
 void pmm_init_region(uint32_t start_addr, size_t size)
 {
 	uint32_t align = ALIGN_UP(start_addr);
-	uint32_t blocks = ALIGN_DOWN(size) / BLOCK_SIZE;
+	uint32_t blocks = ALIGN_UP(size) / BLOCK_SIZE;
 
 	if(blocks == 0)
 		blocks = 1;
@@ -114,7 +114,7 @@ void pmm_init_region(uint32_t start_addr, size_t size)
 void pmm_deinit_region(uint32_t start_addr, size_t size)
 {
 	uint32_t align = ALIGN_UP(start_addr);
-	uint32_t blocks = ALIGN_DOWN(size) / BLOCK_SIZE;
+	uint32_t blocks = ALIGN_UP(size) / BLOCK_SIZE;
 
 	if(blocks == 0)
 		blocks = 1;

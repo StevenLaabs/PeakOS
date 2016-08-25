@@ -8,8 +8,10 @@
 #include <drivers/de9.h>
 #include <thirdp/multiboot.h>
 
+#include "vga.h"
 #include "paging.h"
 #include "pmm.h"
+#include "kheap.h"
 
 void issue_interrupt(unsigned char i)
 {
@@ -70,43 +72,49 @@ void kinit(multiboot_info_t* mb_info)
 
 	terminal_init();
 
-	printf("Paging enabled with higher half...\n");
+	terminal_setcolor(VGA_GREEN, VGA_BLACK);
+	printf("Paging enabled, now running in the higher half at 0x%x\n", &start_kernel_virtual);
 
 	hal_init();
-	printf("Initialized hardware abstraction layer...\n");
+	printf("Initialized hardware abstraction layer (GDT, IDT, and PIC configured)\n");
 
 	if(pmm_init(mb_info)) {
-		printf("Initialized pmm: %u allocation blocks, %u free, %u used or reserved\n\n", 
+		terminal_setcolor(VGA_GREEN, VGA_BLACK);
+		printf("Initialized pmm: %u allocation blocks, %u free, %u used or reserved\n", 
 			(unsigned)pmm_get_num_blocks(), (unsigned)pmm_get_num_free(), (unsigned)pmm_get_num_used());
 	} else {
-		printf("Failed to initialize pmm. Check the flags in the multiboot structure");
+		terminal_setcolor(VGA_RED, VGA_BLACK);
+		printf("Failed to initialize pmm. Check the flags in the multiboot structure\n");
 	}
 
-	
-	void* p = pmm_alloc_block();
-	if(p)
-		printf("p allocated at 0x%x\n", (unsigned)p);
-
-	void* q = pmm_alloc_block();
-	if(q)
-		printf("q allocated at 0x%x\n", (unsigned)q);
-	
-	pmm_free_block(p);
-	printf("Deallocated p\n");
-
-	p = pmm_alloc_block();
-	if(p)
-		printf("p reallocated at 0x%x\n", (unsigned)p);
-
-	void *r = pmm_alloc_block();
-	if(r)
-		printf("r allocated at 0x%x\n\n", (unsigned)r);
+	switch(kheap_init(HEAP_START, HEAP_SIZE)) {
+		case 0:
+			terminal_setcolor(VGA_GREEN, VGA_BLACK);
+			printf("Kernel heap initialized with maximum %uMB starting at 0x%x\n", HEAP_SIZE, HEAP_START);
+			break;
+		case HEAP_NO_PHYS_MEM:
+			terminal_setcolor(VGA_RED, VGA_BLACK);
+			printf("Kernel heap failed to initialize: ran out of physical memory\n");
+			break;
+		case HEAP_INALID_VIRT_MEM:
+			terminal_setcolor(VGA_RED, VGA_BLACK);
+			printf("Kernel heap failed to initialize: given region is either inaccessible or already reserved\n");
+			break;
+		default:
+			terminal_setcolor(VGA_RED, VGA_BLACK);
+			printf("Kernel heap failed to initialize for unknown reasons, check your code!\n");
+			break;
+	}
 	
 	keyboard_init();
+	terminal_setcolor(VGA_MAGENTA, VGA_BLACK);
+	printf("Keyboard driver installed\n");
 
-	printf("Welcome to PeakOS! - Keyboard input should be enabled\n");
-	
 	de9_init(COM1);
+	printf("Serial driver installed for COM1 port\n");
+
+	terminal_setcolor(VGA_WHITE, VGA_BLACK);
+	printf("\nWelcome to PeakOS!\n");
 
 	while(1) { asm("hlt"); }
 }
