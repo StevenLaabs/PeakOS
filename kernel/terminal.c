@@ -147,9 +147,9 @@ void terminal_putchar(char c)
 		break;
 	}
 
-	if(cursor_y > VGA_SCREEN_HEIGHT) {
+	if(cursor_y >= VGA_SCREEN_HEIGHT) {
 		terminal_scroll();
-		cursor_y = VGA_SCREEN_HEIGHT;
+		cursor_y = VGA_SCREEN_HEIGHT - 1;
 	}
 
 	update_cursor();
