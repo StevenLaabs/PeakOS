@@ -137,7 +137,7 @@ void paging_map_page(void* physical, void* virtual)
 		memset(table, 0, sizeof(pte_t) * NUM_ENTRIES);
 
 		pde_t* entry = &directory[PAGE_DIR_INDEX((uint32_t)virtual)];
-		pde_set_address(entry, (uint32_t)virtual);
+		pde_set_address(entry, (uint32_t)table);
 		pde_set_properties(entry, PRESENT | WRITABLE);
 	}
 
@@ -146,6 +146,24 @@ void paging_map_page(void* physical, void* virtual)
 
 	pte_set_address(table_entry, (uint32_t)physical);
 	pte_set_properties(table_entry, PRESENT);
+}
+
+bool paging_map_table(void* physical, void* virtual)
+{
+	pde_t* directory = page_dir_get_current();
+	pde_t* entry = &directory[PAGE_DIR_INDEX((uint32_t)virtual)];
+
+	if(!pde_test_properties(*entry, PRESENT)) {
+		pde_t* table = (pte_t*)physical;
+		memset(table, 0, sizeof(pte_t) * NUM_ENTRIES);
+
+		pde_set_address(entry, (uint32_t)table);
+		pde_set_properties(entry, PRESENT | WRITABLE);
+
+		return true;
+	}
+
+	return false;
 }
 
 bool paging_switch_directory(pde_t* directory)

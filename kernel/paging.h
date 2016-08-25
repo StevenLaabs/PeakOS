@@ -2,6 +2,9 @@
 #define _PAGING_H
 
 #include <stdint.h>
+#include <stdbool.h>
+
+#define TABLE_REGION 0x400000
 
 typedef uint32_t virtual_addr;
 typedef uint32_t pte_t;
@@ -48,6 +51,13 @@ pde_t* page_dir_get_current();
  * in the table that lies in the appropriate directory entry
  */
 void paging_map_page(void* physical, void* virtual);
+
+/*
+ * Map a table to the appropriate entry corresponding to the virtual
+ * address in the current directory with the physical address
+ * Return true if the page is mapped, false if already mapped
+ */
+bool paging_map_table(void* physical, void* virtual);
 
 /*
  * Set the currently loaded paging directory to the new
