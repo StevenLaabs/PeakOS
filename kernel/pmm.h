@@ -5,6 +5,9 @@
 #include <stddef.h>
 #include <thirdp/multiboot.h>
 
+#define ALIGN_UP(x) (((x) + (4096) - 1) & (~((4096) - 1)))
+#define ALIGN_DOWN(x) ((x) & ~((4096) - 1))
+
 /*
  * Initializes the pmm using the multiboot info structure to check
  * the memory map flags are set then using the multiboot mmap to mark

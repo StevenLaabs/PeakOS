@@ -1,9 +1,9 @@
 #include <stdbool.h>
 #include <string.h>
-#include <stdio.h>
 
 #include "pmm.h"
 
+#define VIRTUAL_BASE_ADDR 0xC0000000
 #define BLOCKS_PER_BYTE 8
 #define BLOCK_SIZE 4096
 
@@ -29,14 +29,14 @@ inline static bool map_check(uint32_t bit)
 	return bitmap[bit / 32] & (1 << (bit % 32));
 }
 
-static int32_t map_find_free()
+static uint32_t map_find_free()
 {
 	for(uint32_t map_byte = 0; map_byte < max_blocks / 32; map_byte++) {
 		// check if any bits in these 4 bytes are unset
 		if(bitmap[map_byte] != 0xFFFFFFFF) {
 			// search for the unset bit
-			for(int offset = 0; offset < 32; offset++) {
-				int bit = 1 << offset;
+			for(unsigned int offset = 0; offset < 32; offset++) {
+				unsigned int bit = 1 << offset;
 
 				// check if the bit is unset
 				if(!(bitmap[map_byte] & bit)) {
@@ -47,7 +47,7 @@ static int32_t map_find_free()
 		}
 	}
 
-	return -1;
+	return 0;
 }
 
 uint8_t pmm_init(multiboot_info_t* mb_info)
@@ -57,8 +57,9 @@ uint8_t pmm_init(multiboot_info_t* mb_info)
 
 	extern uint32_t start_kernel_physical;
 	extern uint32_t end_kernel_physical;
+	extern uint32_t end_kernel_virtual;
 
-	bitmap = (uint32_t*)(&end_kernel_physical);
+	bitmap = (uint32_t*)(&end_kernel_virtual);
 	
 	multiboot_memory_map_t* map_addr = (multiboot_memory_map_t*)mb_info->mmap_addr;
 	while(map_addr != (multiboot_memory_map_t*)(mb_info->mmap_addr + mb_info->mmap_length)) {
@@ -84,27 +85,27 @@ uint8_t pmm_init(multiboot_info_t* mb_info)
 	}
 
 	// make sure the kernel memory is reserved
-	pmm_deinit_region((uint32_t)&start_kernel_physical, (size_t)(&end_kernel_physical - &start_kernel_physical));
+	pmm_deinit_region((uint32_t)&start_kernel_physical, (size_t)((uint32_t)&end_kernel_physical - (uint32_t)&start_kernel_physical));
 
 	// reserve the memory space taken up by the bitmap
-	pmm_deinit_region((uint32_t)bitmap, (size_t)(&bitmap[max_blocks / 32] - bitmap));
+	pmm_deinit_region(((uint32_t)bitmap) - VIRTUAL_BASE_ADDR, ((size_t)((uint32_t)&bitmap[max_blocks / 32] - (uint32_t)bitmap)));
 
 	return 1;
 }
 
 void pmm_init_region(uint32_t start_addr, size_t size)
 {
-	int align = start_addr / BLOCK_SIZE;
-	int blocks = size / BLOCK_SIZE;
-	
+	uint32_t align = ALIGN_UP(start_addr);
+	uint32_t blocks = ALIGN_DOWN(size) / BLOCK_SIZE;
+
 	if(blocks == 0)
 		blocks = 1;
 
 	for(; blocks > 0; blocks--) {
-		if(map_check(align)) {
-			map_unset(align++);
-			used_blocks--;
-		}
+		map_unset(align / BLOCK_SIZE);
+
+		align += 4096;
+		used_blocks--;
 	}
 
 	map_set(0);
@@ -112,17 +113,17 @@ void pmm_init_region(uint32_t start_addr, size_t size)
 
 void pmm_deinit_region(uint32_t start_addr, size_t size)
 {
-	int align = start_addr / BLOCK_SIZE;
-	int blocks = size / BLOCK_SIZE;
+	uint32_t align = ALIGN_UP(start_addr);
+	uint32_t blocks = ALIGN_DOWN(size) / BLOCK_SIZE;
 
 	if(blocks == 0)
 		blocks = 1;
 
 	for(; blocks > 0; blocks--) {
-		if(!map_check(align)) {
-			map_set(align++);
-			used_blocks++;
-		}
+		map_set(align / BLOCK_SIZE);
+
+		align += 4096;
+		used_blocks++;
 	}
 }
 
@@ -132,8 +133,8 @@ void* pmm_alloc_block()
 	if(max_blocks - used_blocks <= 0)
 		return 0;
 
-	int32_t block = map_find_free();
-	if(block == -1)
+	uint32_t block = map_find_free();
+	if(!block)
 		return 0;
 
 	map_set(block);
@@ -146,7 +147,7 @@ void* pmm_alloc_block()
 
 void pmm_free_block(void* mem)
 {
-	uint32_t addr = (uint32_t)mem;
+	uint32_t addr = ALIGN_DOWN((uint32_t)mem);
 	uint32_t block = addr / BLOCK_SIZE;
 
 	map_unset(block);
